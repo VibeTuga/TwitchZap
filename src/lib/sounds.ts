@@ -1,17 +1,48 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useSyncExternalStore, useCallback, useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const STORAGE_KEY = "soundEnabled";
 
-function getStoredSoundEnabled(): boolean {
-  if (typeof window === "undefined") return false;
+// Module-level store so all hook instances share the same state
+let soundEnabled = false;
+const listeners = new Set<() => void>();
+
+function emitChange() {
+  listeners.forEach((l) => l());
+}
+
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+  return () => listeners.delete(callback);
+}
+
+function getSnapshot() {
+  return soundEnabled;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
+// Initialize from localStorage on first load
+if (typeof window !== "undefined") {
   try {
-    return localStorage.getItem(STORAGE_KEY) === "true";
+    soundEnabled = localStorage.getItem(STORAGE_KEY) === "true";
   } catch {
-    return false;
+    // localStorage unavailable
   }
+}
+
+function toggleSoundEnabled() {
+  soundEnabled = !soundEnabled;
+  try {
+    localStorage.setItem(STORAGE_KEY, String(soundEnabled));
+  } catch {
+    // localStorage unavailable
+  }
+  emitChange();
 }
 
 function getAudioContext(): AudioContext | null {
@@ -99,38 +130,25 @@ function playJingle(ctx: AudioContext) {
   });
 }
 
+// Shared AudioContext ref across all hook instances
+let sharedCtx: AudioContext | null = null;
+
 export function useSoundEffects() {
-  const [enabled, setEnabled] = useState(false);
+  const enabled = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const reducedMotion = useReducedMotion();
-  const ctxRef = useRef<AudioContext | null>(null);
-
-  // Hydrate from localStorage after mount
-  useEffect(() => {
-    setEnabled(getStoredSoundEnabled());
-  }, []);
-
-  const toggle = useCallback(() => {
-    setEnabled((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(STORAGE_KEY, String(next));
-      } catch {
-        // localStorage unavailable
-      }
-      return next;
-    });
-  }, []);
+  const canPlayRef = useRef(false);
+  canPlayRef.current = enabled && !reducedMotion;
 
   const getContext = useCallback(() => {
-    if (!enabled || reducedMotion) return null;
-    if (!ctxRef.current || ctxRef.current.state === "closed") {
-      ctxRef.current = getAudioContext();
+    if (!canPlayRef.current) return null;
+    if (!sharedCtx || sharedCtx.state === "closed") {
+      sharedCtx = getAudioContext();
     }
-    if (ctxRef.current?.state === "suspended") {
-      ctxRef.current.resume();
+    if (sharedCtx?.state === "suspended") {
+      sharedCtx.resume();
     }
-    return ctxRef.current;
-  }, [enabled, reducedMotion]);
+    return sharedCtx;
+  }, []);
 
   const playVoteSound = useCallback(() => {
     const ctx = getContext();
@@ -154,7 +172,7 @@ export function useSoundEffects() {
 
   return {
     soundEnabled: enabled,
-    toggleSound: toggle,
+    toggleSound: toggleSoundEnabled,
     playVoteSound,
     playExtensionSound,
     playTransitionSound,
