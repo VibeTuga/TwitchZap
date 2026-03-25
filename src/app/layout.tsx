@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -46,6 +47,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-on-surface font-body">
+        <Script
+          src="https://player.twitch.tv/js/embed/v1.js"
+          strategy="afterInteractive"
+        />
         <Sidebar />
         <div className="lg:ml-64 min-h-screen flex flex-col">
           <TopBar />
