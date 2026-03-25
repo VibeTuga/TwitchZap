@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton-card";
+
+interface AuthUser {
+  id: string;
+  twitchUsername: string;
+  twitchDisplayName: string;
+  role: string;
+}
 
 interface ChannelInfo {
   id: string;
@@ -50,6 +58,8 @@ interface SubmissionResult {
 }
 
 export default function SubmitPage() {
+  // null = loading, false = not logged in, AuthUser = logged in
+  const [user, setUser] = useState<AuthUser | false | null>(null);
   const [username, setUsername] = useState("");
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -59,6 +69,13 @@ export default function SubmitPage() {
     null
   );
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data: AuthUser) => setUser(data))
+      .catch(() => setUser(false));
+  }, []);
 
   const handleCheck = useCallback(async () => {
     const trimmed = username.trim();
@@ -135,7 +152,14 @@ export default function SubmitPage() {
 
       if (!res.ok) {
         if (res.status === 401) {
-          setError("You must be logged in to submit a stream.");
+          toast.error("You must be logged in to submit a stream.", {
+            action: {
+              label: "Log in",
+              onClick: () => {
+                window.location.href = "/auth/login";
+              },
+            },
+          });
         } else {
           setError(data.error || "Failed to submit stream");
         }
@@ -172,6 +196,26 @@ export default function SubmitPage() {
     }
   };
 
+  const isLoggedIn = user !== null && user !== false;
+
+  if (user === null) {
+    return (
+      <div className="space-y-8 max-w-2xl mx-auto">
+        <div>
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-5 w-48 mt-2" />
+        </div>
+        <div className="bg-surface-container rounded-2xl p-4 sm:p-6 space-y-4">
+          <Skeleton className="h-4 w-28" />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Skeleton className="flex-1 h-12 rounded-xl" />
+            <Skeleton className="h-12 w-full sm:w-24 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-2xl mx-auto">
       {/* Header */}
@@ -183,6 +227,29 @@ export default function SubmitPage() {
           Give a streamer their 15 minutes of fame
         </p>
       </div>
+
+      {/* Login prompt */}
+      {!isLoggedIn && (
+        <div className="bg-primary/10 rounded-2xl p-5 flex items-center gap-4">
+          <span className="material-symbols-outlined text-primary text-2xl">
+            lock
+          </span>
+          <div className="flex-1">
+            <p className="text-on-surface font-headline font-bold text-sm">
+              Log in to submit streams
+            </p>
+            <p className="text-on-surface-variant text-xs mt-0.5">
+              You can still check stream status below
+            </p>
+          </div>
+          <Link
+            href="/auth/login"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(170,48,250,0.4)]"
+          >
+            Log in
+          </Link>
+        </div>
+      )}
 
       {/* Search Input */}
       <div className="bg-surface-container rounded-2xl p-4 sm:p-6 space-y-4">
@@ -303,7 +370,8 @@ export default function SubmitPage() {
           {checkResult.status === "live" && (
             <button
               onClick={handleSubmit}
-              disabled={submitting}
+              disabled={submitting || !isLoggedIn}
+              title={!isLoggedIn ? "Log in required" : undefined}
               className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(170,48,250,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (
@@ -318,7 +386,7 @@ export default function SubmitPage() {
                   <span className="material-symbols-outlined text-lg">
                     publish
                   </span>
-                  Add to Queue
+                  {isLoggedIn ? "Add to Queue" : "Log in to Submit"}
                 </>
               )}
             </button>
