@@ -12,6 +12,7 @@ import {
   streams,
 } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ProfileContent } from "./ProfileContent";
 
 export const metadata: Metadata = {
@@ -120,26 +121,28 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
-      <ProfileContent
-        user={{
-          twitchDisplayName: user.profile.twitchDisplayName,
-          twitchUsername: user.profile.twitchUsername,
-          twitchAvatarUrl: user.profile.twitchAvatarUrl,
-          zapPoints: user.profile.zapPoints,
-          totalPointsEarned: user.profile.totalPointsEarned,
-          streamsSubmitted: user.profile.streamsSubmitted,
-          votesCast: user.profile.votesCast,
-          watchMinutes: user.profile.watchMinutes,
-          role: user.profile.role,
-          createdAt: user.profile.createdAt,
-        }}
-        allBadges={allBadges}
-        earnedBadges={earnedBadges}
-        transactions={transactions}
-        submissions={submissions}
-        votes={userVotes}
-        voteAccuracy={voteAccuracy}
-      />
+      <ErrorBoundary fallbackMessage="Profile unavailable">
+        <ProfileContent
+          user={{
+            twitchDisplayName: user.profile.twitchDisplayName,
+            twitchUsername: user.profile.twitchUsername,
+            twitchAvatarUrl: user.profile.twitchAvatarUrl,
+            zapPoints: user.profile.zapPoints,
+            totalPointsEarned: user.profile.totalPointsEarned,
+            streamsSubmitted: user.profile.streamsSubmitted,
+            votesCast: user.profile.votesCast,
+            watchMinutes: user.profile.watchMinutes,
+            role: user.profile.role,
+            createdAt: user.profile.createdAt,
+          }}
+          allBadges={allBadges}
+          earnedBadges={earnedBadges}
+          transactions={transactions}
+          submissions={submissions}
+          votes={userVotes}
+          voteAccuracy={voteAccuracy}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

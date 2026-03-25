@@ -8,6 +8,7 @@ import { useBroadcast } from "@/hooks/useBroadcast";
 import { useVoting } from "@/hooks/useVoting";
 import { useWatchTime } from "@/hooks/useWatchTime";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton-card";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { UpNext } from "@/components/UpNext";
 import { ActivityFeed } from "@/components/ActivityFeed";
 
@@ -175,22 +176,26 @@ export default function LiveViewPage() {
       {/* Main Content — Left Column */}
       <div className="col-span-12 xl:col-span-9 space-y-4">
         {/* Stream Player */}
-        <StreamPlayer
-          channel={channelUsername ?? null}
-          isReconnecting={isReconnecting}
-          gracePeriodExpiresAt={broadcast?.gracePeriodExpiresAt}
-        />
+        <ErrorBoundary fallbackMessage="Stream player unavailable">
+          <StreamPlayer
+            channel={channelUsername ?? null}
+            isReconnecting={isReconnecting}
+            gracePeriodExpiresAt={broadcast?.gracePeriodExpiresAt}
+          />
+        </ErrorBoundary>
 
         {/* Voting Panel */}
         <div className="px-4 md:px-0">
-          <VotingPanel
-            broadcast={broadcast}
-            onVote={castVote}
-            hasVoted={hasVoted}
-            isSubmitting={isSubmitting}
-            counts={counts}
-            onExtension={handleExtension}
-          />
+          <ErrorBoundary fallbackMessage="Voting temporarily unavailable">
+            <VotingPanel
+              broadcast={broadcast}
+              onVote={castVote}
+              hasVoted={hasVoted}
+              isSubmitting={isSubmitting}
+              counts={counts}
+              onExtension={handleExtension}
+            />
+          </ErrorBoundary>
         </div>
 
         {/* Stream Info Card */}
@@ -292,40 +297,46 @@ export default function LiveViewPage() {
 
         {/* Up Next Section */}
         <div className="px-4 md:px-0">
-          <UpNext />
+          <ErrorBoundary fallbackMessage="Up next unavailable">
+            <UpNext />
+          </ErrorBoundary>
         </div>
       </div>
 
       {/* Right Sidebar */}
       <aside className="col-span-12 xl:col-span-3 xl:sticky xl:top-24 xl:h-[calc(100vh-120px)] flex flex-col gap-6">
         {/* Twitch Chat */}
-        <div className="twitch-chat-gradient rounded-[1.5rem] flex flex-col overflow-hidden shadow-2xl h-[300px] xl:h-auto xl:flex-[3]">
-          <div className="p-4 bg-[#1f1f23]/50 backdrop-blur-md flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[#bf94ff]">
-                chat
-              </span>
-              <h4 className="text-xs font-black uppercase tracking-widest text-on-surface">
-                Stream Chat
-              </h4>
+        <ErrorBoundary fallbackMessage="Chat unavailable">
+          <div className="twitch-chat-gradient rounded-[1.5rem] flex flex-col overflow-hidden shadow-2xl h-[300px] xl:h-auto xl:flex-[3]">
+            <div className="p-4 bg-[#1f1f23]/50 backdrop-blur-md flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#bf94ff]">
+                  chat
+                </span>
+                <h4 className="text-xs font-black uppercase tracking-widest text-on-surface">
+                  Stream Chat
+                </h4>
+              </div>
             </div>
+            {channelUsername ? (
+              <iframe
+                src={`https://www.twitch.tv/embed/${channelUsername}/chat?parent=${hostname}&darkpopout`}
+                className="flex-1 w-full border-0"
+                title="Twitch Chat"
+              />
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-on-surface-variant text-sm">
+                Chat unavailable
+              </div>
+            )}
           </div>
-          {channelUsername ? (
-            <iframe
-              src={`https://www.twitch.tv/embed/${channelUsername}/chat?parent=${hostname}&darkpopout`}
-              className="flex-1 w-full border-0"
-              title="Twitch Chat"
-            />
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-on-surface-variant text-sm">
-              Chat unavailable
-            </div>
-          )}
-        </div>
+        </ErrorBoundary>
 
         {/* Activity Feed — hidden on mobile */}
         <div className="hidden xl:block">
-          <ActivityFeed />
+          <ErrorBoundary fallbackMessage="Activity feed unavailable">
+            <ActivityFeed />
+          </ErrorBoundary>
         </div>
       </aside>
     </div>

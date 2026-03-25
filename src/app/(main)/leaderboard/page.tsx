@@ -3,6 +3,7 @@ import { getUser } from "@/lib/auth";
 import { db } from "@/db";
 import { badges, userBadges } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { LeaderboardContent } from "./LeaderboardContent";
 
 export const metadata: Metadata = {
@@ -81,11 +82,13 @@ export default async function LeaderboardPage() {
         </p>
       </div>
 
-      <LeaderboardContent
-        allBadges={allBadges}
-        earnedBadges={earnedBadges}
-        userStats={userStats}
-      />
+      <ErrorBoundary fallbackMessage="Leaderboard unavailable">
+        <LeaderboardContent
+          allBadges={allBadges}
+          earnedBadges={earnedBadges}
+          userStats={userStats}
+        />
+      </ErrorBoundary>
     </div>
   );
 }
