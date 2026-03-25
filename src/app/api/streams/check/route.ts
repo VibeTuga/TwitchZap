@@ -104,6 +104,7 @@ export async function GET(request: NextRequest) {
       : null,
     cooldown_remaining: cooldownRemaining,
     queue_position: queuePosition,
+    stream_id: existingStream?.id ?? null,
   });
   } catch {
     return NextResponse.json(
