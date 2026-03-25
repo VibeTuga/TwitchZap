@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { db } from "@/db";
@@ -412,10 +413,13 @@ export default async function AdminPage() {
                     <td className="py-3 pr-3">
                       <div className="flex items-center gap-2.5">
                         {u.twitchAvatarUrl ? (
-                          <img
+                          <Image
                             src={u.twitchAvatarUrl}
                             alt=""
+                            width={28}
+                            height={28}
                             className="w-7 h-7 rounded-full shrink-0"
+                            unoptimized
                           />
                         ) : (
                           <div className="w-7 h-7 rounded-full bg-surface-container-high shrink-0 flex items-center justify-center">

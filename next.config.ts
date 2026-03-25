@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "static-cdn.jtvnw.net",
       },
+      {
+        protocol: "https",
+        hostname: "*.jtvnw.net",
+      },
     ],
   },
   async headers() {
