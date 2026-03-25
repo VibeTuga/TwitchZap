@@ -3,6 +3,7 @@ import { getQueue, getRecentBroadcasts } from "@/lib/queue";
 import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ScheduleTabs } from "./ScheduleTabs";
 
 export const metadata: Metadata = {
@@ -48,11 +49,13 @@ export default async function SchedulePage() {
         </p>
       </div>
 
-      <ScheduleTabs
-        queueEntries={queueEntries}
-        recentBroadcasts={recentBroadcasts}
-        activeBroadcastId={activeBroadcast?.id ?? null}
-      />
+      <ErrorBoundary fallbackMessage="Schedule unavailable">
+        <ScheduleTabs
+          queueEntries={queueEntries}
+          recentBroadcasts={recentBroadcasts}
+          activeBroadcastId={activeBroadcast?.id ?? null}
+        />
+      </ErrorBoundary>
     </div>
   );
 }
