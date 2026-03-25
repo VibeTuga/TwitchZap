@@ -1,12 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/rotate",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/cron/queue-guardian",
-      "schedule": "*/5 * * * *"
-    }
-  ]
-}
+{}
