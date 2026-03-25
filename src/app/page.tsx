@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useBroadcast } from "@/hooks/useBroadcast";
 import { useVoting } from "@/hooks/useVoting";
-
 import { useWatchTime } from "@/hooks/useWatchTime";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton-card";
 
