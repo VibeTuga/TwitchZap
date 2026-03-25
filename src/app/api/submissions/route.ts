@@ -173,7 +173,8 @@ export async function POST(request: NextRequest) {
     },
     new_badges: newBadges,
   });
-  } catch {
+  } catch (err) {
+    console.error("POST /api/submissions error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
