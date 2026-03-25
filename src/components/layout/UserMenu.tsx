@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const supabase = useMemo(() => createClient(), []);
@@ -24,6 +26,20 @@ export function UserMenu() {
 
     return () => subscription.unsubscribe();
   }, [supabase]);
+
+  useEffect(() => {
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.role === "admin") setIsAdmin(true);
+        else setIsAdmin(false);
+      })
+      .catch(() => setIsAdmin(false));
+  }, [user]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -108,6 +124,18 @@ export function UserMenu() {
                 {displayName}
               </p>
             </div>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">
+                  admin_panel_settings
+                </span>
+                Admin Dashboard
+              </Link>
+            )}
             <button
               onClick={handleSignOut}
               className="w-full text-left px-4 py-2 text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-colors"
