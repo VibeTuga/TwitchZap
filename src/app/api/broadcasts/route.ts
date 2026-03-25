@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { broadcasts, streams, queue, users, votes } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // Get current live broadcast
   const [broadcast] = await db
     .select({
