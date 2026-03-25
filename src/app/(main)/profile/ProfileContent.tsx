@@ -311,9 +311,19 @@ export function ProfileContent({
         )}
 
         {transactions.length === 0 && (
-          <p className="text-sm text-on-surface-variant py-4 text-center">
-            No transactions yet. Start watching and voting to earn points!
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-primary-dim text-3xl">
+                receipt_long
+              </span>
+            </div>
+            <h3 className="text-lg font-headline font-bold text-on-surface">
+              No transactions yet
+            </h3>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Start watching and voting to earn points!
+            </p>
+          </div>
         )}
       </section>
 
@@ -340,9 +350,19 @@ export function ProfileContent({
           My Submissions
         </h2>
         {submissions.length === 0 ? (
-          <p className="text-sm text-on-surface-variant py-4 text-center">
-            No submissions yet. Submit a stream to get started!
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-primary-dim text-3xl">
+                upload
+              </span>
+            </div>
+            <h3 className="text-lg font-headline font-bold text-on-surface">
+              No submissions yet
+            </h3>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Submit a stream to get started!
+            </p>
+          </div>
         ) : (
           <div className="space-y-1">
             {submissions.map((sub) => (
@@ -417,9 +437,19 @@ export function ProfileContent({
           )}
         </div>
         {votes.length === 0 ? (
-          <p className="text-sm text-on-surface-variant py-4 text-center">
-            No votes yet. Vote during broadcasts to build your history!
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-primary-dim text-3xl">
+                how_to_vote
+              </span>
+            </div>
+            <h3 className="text-lg font-headline font-bold text-on-surface">
+              No votes yet
+            </h3>
+            <p className="text-sm text-on-surface-variant mt-1">
+              Vote during broadcasts to build your history!
+            </p>
+          </div>
         ) : (
           <div className="space-y-1">
             {votes.map((v) => {

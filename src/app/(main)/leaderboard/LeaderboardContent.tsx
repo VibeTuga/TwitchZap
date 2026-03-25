@@ -232,17 +232,17 @@ export function LeaderboardContent({
             ))}
           </div>
         ) : !data?.rankings.length ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-surface-variant/50 flex items-center justify-center mb-4">
-              <span className="material-symbols-outlined text-on-surface-variant text-2xl">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-primary-dim text-3xl">
                 leaderboard
               </span>
             </div>
-            <h3 className="text-base font-headline font-bold text-on-surface">
+            <h3 className="text-lg font-headline font-bold text-on-surface">
               No rankings yet
             </h3>
             <p className="text-sm text-on-surface-variant mt-1">
-              Start watching, voting, and submitting to climb the leaderboard!
+              Start watching and voting to earn your spot!
             </p>
           </div>
         ) : (

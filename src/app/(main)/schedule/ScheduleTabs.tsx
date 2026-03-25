@@ -196,8 +196,8 @@ export function ScheduleTabs({
       <TabsContent value="recent" className="mt-4 space-y-3">
         {recentBroadcasts.length === 0 ? (
           <EmptyState
-            icon="history"
-            title="No recent broadcasts"
+            icon="sensors"
+            title="No broadcasts yet"
             description="Broadcasts will appear here once streams start airing."
           />
         ) : (
@@ -358,20 +358,20 @@ function BroadcastCard({ broadcast }: { broadcast: BroadcastEntry }) {
 
 function EmptyQueueState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
         <span
-          className="material-symbols-outlined text-primary-dim text-2xl"
+          className="material-symbols-outlined text-primary-dim text-3xl"
           style={{ fontVariationSettings: "'FILL' 1" }}
         >
           queue
         </span>
       </div>
-      <h3 className="text-base font-headline font-bold text-on-surface">
-        No streams in queue yet
+      <h3 className="text-lg font-headline font-bold text-on-surface">
+        No streams in queue
       </h3>
       <p className="text-sm text-on-surface-variant mt-1 mb-4">
-        Be the first to submit!
+        Be the first to submit a stream!
       </p>
       <Link
         href="/submit"
@@ -394,13 +394,13 @@ function EmptyState({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-14 h-14 rounded-2xl bg-surface-variant/50 flex items-center justify-center mb-4">
-        <span className="material-symbols-outlined text-on-surface-variant text-2xl">
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-16 h-16 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+        <span className="material-symbols-outlined text-primary-dim text-3xl">
           {icon}
         </span>
       </div>
-      <h3 className="text-base font-headline font-bold text-on-surface">
+      <h3 className="text-lg font-headline font-bold text-on-surface">
         {title}
       </h3>
       <p className="text-sm text-on-surface-variant mt-1">{description}</p>
