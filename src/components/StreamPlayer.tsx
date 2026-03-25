@@ -93,6 +93,7 @@ export function StreamPlayer({
         parent: [window.location.hostname],
         width: "100%",
         height: "100%",
+        autoplay: true,
         muted: true,
       });
 
