@@ -51,6 +51,60 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // (2.5) Server-side liveness check for currently-playing broadcast
+  if (current) {
+    const [currentStream] = await db
+      .select({ twitchUsername: streams.twitchUsername })
+      .from(streams)
+      .where(eq(streams.id, current.streamId))
+      .limit(1);
+
+    if (currentStream) {
+      const streamInfo = await getStreamInfo(currentStream.twitchUsername);
+
+      if (!streamInfo && !current.gracePeriodExpiresAt) {
+        // Stream went offline — start grace period
+        const gracePeriodExpiresAt = new Date(now.getTime() + 30_000);
+
+        await db
+          .update(broadcasts)
+          .set({
+            offlineDetectedAt: now.toISOString(),
+            gracePeriodExpiresAt: gracePeriodExpiresAt.toISOString(),
+            offlineDetectionMethod: "helix_api",
+            offlineReporters: [],
+          })
+          .where(eq(broadcasts.id, current.id));
+
+        await supabase.channel("broadcast-live").send({
+          type: "broadcast",
+          event: "stream_reconnecting",
+          payload: {
+            broadcast_id: current.id,
+            grace_period_expires_at: gracePeriodExpiresAt.toISOString(),
+          },
+        });
+      } else if (streamInfo && current.offlineDetectedAt) {
+        // Stream recovered — clear offline state
+        await db
+          .update(broadcasts)
+          .set({
+            offlineDetectedAt: null,
+            gracePeriodExpiresAt: null,
+            offlineReporters: [],
+            recoveryCount: sql`${broadcasts.recoveryCount} + 1`,
+          })
+          .where(eq(broadcasts.id, current.id));
+
+        await supabase.channel("broadcast-live").send({
+          type: "broadcast",
+          event: "stream_recovered",
+          payload: { broadcast_id: current.id },
+        });
+      }
+    }
+  }
+
   // (2) Check if current broadcast has expired
   let justEnded = false;
 
