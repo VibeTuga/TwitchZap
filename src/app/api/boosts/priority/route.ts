@@ -4,7 +4,7 @@ import { spendPoints } from "@/lib/points";
 import { db } from "@/db";
 import { queue } from "@/db/schema";
 import { eq, and, sql, lt, gte } from "drizzle-orm";
-import { isValidUUID } from "@/lib/validation";
+import { isValidUUID, validateOrigin } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 10 });
@@ -14,6 +14,10 @@ const POSITIONS_TO_MOVE = 3;
 
 export async function POST(request: NextRequest) {
   try {
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   try { limiter.check(ip); } catch {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });

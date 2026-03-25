@@ -4,13 +4,17 @@ import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isValidUUID, isValidLivenessStatus } from "@/lib/validation";
+import { isValidUUID, isValidLivenessStatus, validateOrigin } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 30 });
 
 export async function POST(request: NextRequest) {
   try {
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   try { limiter.check(ip); } catch {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
