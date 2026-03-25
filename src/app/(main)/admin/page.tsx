@@ -373,7 +373,6 @@ export default async function AdminPage() {
               </div>
             </div>
             <AdminBroadcastActions
-              broadcastId={activeBroadcast.id}
               streamName={
                 activeBroadcast.streamName ||
                 activeBroadcast.streamUsername

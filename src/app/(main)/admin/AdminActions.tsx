@@ -56,10 +56,8 @@ export function AdminQueueRemoveButton({
 // --- Broadcast Control Buttons ---
 
 export function AdminBroadcastActions({
-  broadcastId,
   streamName,
 }: {
-  broadcastId: string;
   streamName: string;
 }) {
   const router = useRouter();
