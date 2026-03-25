@@ -24,7 +24,14 @@ interface CheckResult {
   stream?: StreamInfo | null;
   cooldown_remaining?: { hours: number; minutes: number } | null;
   queue_position?: number | null;
+  stream_id?: string | null;
   error?: string;
+}
+
+interface NewBadge {
+  name: string;
+  icon: string;
+  pointsReward: number;
 }
 
 interface SubmissionResult {
@@ -39,12 +46,14 @@ interface SubmissionResult {
     viewer_count: number;
     title: string;
   };
+  new_badges?: NewBadge[];
 }
 
 export default function SubmitPage() {
   const [username, setUsername] = useState("");
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [boosting, setBoosting] = useState(false);
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
   const [submitResult, setSubmitResult] = useState<SubmissionResult | null>(
     null
@@ -80,6 +89,34 @@ export default function SubmitPage() {
     }
   }, [username]);
 
+  const handleBoost = useCallback(async () => {
+    if (!checkResult?.stream_id || boosting) return;
+
+    setBoosting(true);
+    try {
+      const res = await fetch("/api/boosts/cooldown", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stream_id: checkResult.stream_id }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to apply boost");
+      } else {
+        toast.success("Cooldown Boosted!", {
+          description: `Reduced by 2 hours (${data.points_spent} Zap Points spent). New cooldown: ${Math.round(data.new_cooldown_hours)}h`,
+        });
+        // Re-check the stream to update cooldown display
+        handleCheck();
+      }
+    } catch {
+      toast.error("Failed to apply boost. Please try again.");
+    } finally {
+      setBoosting(false);
+    }
+  }, [checkResult?.stream_id, boosting, handleCheck]);
+
   const handleSubmit = useCallback(async () => {
     if (!checkResult || checkResult.status !== "live") return;
 
@@ -109,6 +146,17 @@ export default function SubmitPage() {
         toast.success("Stream submitted!", {
           description: `${data.stream.twitch_display_name} is at position #${data.queue_position} in queue`,
         });
+
+        // Show badge toasts for newly earned badges
+        if (data.new_badges?.length > 0) {
+          for (const badge of data.new_badges) {
+            toast.success(`Badge Unlocked: ${badge.name}!`, {
+              description: badge.pointsReward > 0
+                ? `${badge.icon} +${badge.pointsReward} bonus Zap Points`
+                : badge.icon,
+            });
+          }
+        }
       }
     } catch {
       setError("Failed to submit stream. Please try again.");
@@ -247,6 +295,8 @@ export default function SubmitPage() {
             status={checkResult.status}
             cooldown={checkResult.cooldown_remaining}
             queuePosition={checkResult.queue_position}
+            onBoost={checkResult.status === "cooldown" && checkResult.stream_id ? handleBoost : undefined}
+            boosting={boosting}
           />
 
           {/* Submit Button */}
@@ -305,10 +355,14 @@ function StatusBadge({
   status,
   cooldown,
   queuePosition,
+  onBoost,
+  boosting,
 }: {
   status: string;
   cooldown?: { hours: number; minutes: number } | null;
   queuePosition?: number | null;
+  onBoost?: () => void;
+  boosting?: boolean;
 }) {
   switch (status) {
     case "live":
@@ -340,9 +394,19 @@ function StatusBadge({
           <span className="text-sm font-bold text-on-surface-variant">
             COOLDOWN
           </span>
-          <span className="text-sm text-on-surface-variant">
+          <span className="text-sm text-on-surface-variant flex-1">
             — Available in {cooldown?.hours}h {cooldown?.minutes}m
           </span>
+          {onBoost && (
+            <button
+              onClick={onBoost}
+              disabled={boosting}
+              className="ml-auto px-3 py-1 rounded-lg bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-sm">bolt</span>
+              {boosting ? "Boosting..." : "Boost (100 ZP)"}
+            </button>
+          )}
         </div>
       );
     case "in_queue":

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 interface VoteCounts {
@@ -65,6 +66,17 @@ export function useVoting(broadcastId: string | null) {
             stay: data.current_totals.stay,
             total: data.current_totals.skip + data.current_totals.stay,
           });
+
+          // Show badge toasts for newly earned badges
+          if (data.new_badges?.length > 0) {
+            for (const badge of data.new_badges) {
+              toast.success(`Badge Unlocked: ${badge.name}!`, {
+                description: badge.pointsReward > 0
+                  ? `${badge.icon} +${badge.pointsReward} bonus Zap Points`
+                  : badge.icon,
+              });
+            }
+          }
         }
       } finally {
         setIsSubmitting(false);

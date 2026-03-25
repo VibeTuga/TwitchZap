@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { viewerSessions, broadcasts, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { awardPoints } from "@/lib/points";
+import { checkAndAwardBadges } from "@/lib/badges";
 import { isValidUUID } from "@/lib/validation";
 
 const HEARTBEAT_SECONDS = 60;
@@ -97,10 +98,14 @@ export async function POST(request: NextRequest) {
         .where(eq(viewerSessions.id, existing.id));
     }
 
+    // Check for new badges after watch time updates
+    const newBadges = await checkAndAwardBadges(user.profile.id);
+
     return NextResponse.json({
       success: true,
       watch_seconds: newWatchSeconds,
       points_awarded: minutesSinceLastAward > 0 ? minutesSinceLastAward : 0,
+      new_badges: newBadges,
     });
   }
 
@@ -116,6 +121,7 @@ export async function POST(request: NextRequest) {
     success: true,
     watch_seconds: HEARTBEAT_SECONDS,
     points_awarded: 0,
+    new_badges: [],
   });
   } catch {
     return NextResponse.json(
