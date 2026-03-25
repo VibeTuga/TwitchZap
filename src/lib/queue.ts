@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { queue, streams, users } from "@/db/schema";
+import { queue, streams, users, broadcasts } from "@/db/schema";
 import { eq, sql, and, desc, asc } from "drizzle-orm";
 
 export async function addToQueue(streamId: string, userId: string) {
@@ -82,8 +82,6 @@ export async function getNextWaiting() {
 }
 
 export async function getRecentBroadcasts() {
-  const { broadcasts } = await import("@/db/schema");
-
   return db
     .select({
       id: broadcasts.id,
