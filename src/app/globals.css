@@ -167,6 +167,11 @@
   border-radius: 10px;
 }
 
+/* ─── Twitch chat gradient background ────────────────────────────────── */
+.twitch-chat-gradient {
+  background: linear-gradient(180deg, rgba(31,31,35,0.8) 0%, rgba(14,14,17,0.9) 100%);
+}
+
 /* ─── Shimmer animation for skeleton loading ─────────────────────────── */
 @keyframes shimmer {
   0% { background-position: 200% 0; }
