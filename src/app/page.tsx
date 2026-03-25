@@ -178,6 +178,7 @@ export default function LiveViewPage() {
         <StreamPlayer
           channel={channelUsername ?? null}
           isReconnecting={isReconnecting}
+          gracePeriodExpiresAt={broadcast?.gracePeriodExpiresAt}
         />
 
         {/* Voting Panel */}
