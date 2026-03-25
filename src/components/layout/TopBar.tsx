@@ -42,7 +42,7 @@ export function TopBar() {
   }, [supabase]);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 h-14 md:h-16 lg:ml-64 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">
+    <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 h-14 md:h-16 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">
       {/* Mobile logo */}
       <div className="flex items-center gap-2 lg:hidden">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-[0_0_16px_rgba(211,148,255,0.3)]">
