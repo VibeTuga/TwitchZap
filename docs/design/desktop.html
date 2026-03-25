@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TwitchZap - Live Stream</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#005406",
+                        "surface-bright": "#2c2c30",
+                        "primary-fixed": "#cb80ff",
+                        "secondary": "#59ee50",
+                        "inverse-surface": "#fcf8fd",
+                        "surface-variant": "#25252a",
+                        "error-dim": "#d73357",
+                        "on-primary": "#4a0076",
+                        "on-surface-variant": "#acaaae",
+                        "on-primary-fixed-variant": "#470071",
+                        "surface-container-high": "#1f1f23",
+                        "on-primary-container": "#39005c",
+                        "surface-container-highest": "#25252a",
+                        "on-surface": "#f0edf1",
+                        "inverse-on-surface": "#555458",
+                        "on-error": "#490013",
+                        "secondary-container": "#006e0a",
+                        "background": "#0e0e11",
+                        "primary-fixed-dim": "#c26bff",
+                        "on-tertiary-fixed-variant": "#326f6f",
+                        "on-secondary-fixed-variant": "#005f07",
+                        "tertiary-dim": "#9ddad9",
+                        "on-error-container": "#ffb2b9",
+                        "primary-container": "#cb80ff",
+                        "secondary-fixed-dim": "#49e043",
+                        "surface-tint": "#d394ff",
+                        "tertiary-fixed-dim": "#b3f1f0",
+                        "inverse-primary": "#9100e0",
+                        "primary": "#d394ff",
+                        "surface-dim": "#0e0e11",
+                        "surface-container": "#19191d",
+                        "tertiary-container": "#b9f6f5",
+                        "surface-container-low": "#131316",
+                        "on-secondary-container": "#e6ffdb",
+                        "on-tertiary": "#2a6868",
+                        "primary-dim": "#aa30fa",
+                        "on-tertiary-container": "#206060",
+                        "surface": "#0e0e11",
+                        "error-container": "#a70138",
+                        "on-background": "#f0edf1",
+                        "secondary-dim": "#49e043",
+                        "outline-variant": "#48474b",
+                        "outline": "#767579",
+                        "on-primary-fixed": "#000000",
+                        "error": "#ff6e84",
+                        "secondary-fixed": "#59ee50",
+                        "on-secondary-fixed": "#003e03",
+                        "tertiary-fixed": "#c1fffe",
+                        "tertiary": "#e2fffe",
+                        "surface-container-lowest": "#000000",
+                        "on-tertiary-fixed": "#0b5252"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0e0e11;
+            color: #f0edf1;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #25252a;
+            border-radius: 10px;
+        }
+        .twitch-chat-gradient {
+            background: linear-gradient(180deg, rgba(19, 19, 22, 1) 0%, rgba(25, 25, 29, 1) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background overflow-x-hidden">
+<!-- SideNavBar (Predicted Component) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#131316] dark:bg-[#131316] font-['Plus_Jakarta_Sans'] tracking-tight flex flex-col py-6 px-4 z-50">
+<div class="mb-10 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-dim flex items-center justify-center shadow-[0_0_20px_rgba(170,48,250,0.4)]">
+<span class="material-symbols-outlined text-on-primary-fixed" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div>
+<h1 class="text-2xl font-black text-[#d394ff] dark:text-[#d394ff] leading-none">TwitchZap</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant font-bold mt-1">Community Powered</p>
+</div>
+</div>
+<nav class="flex-1 space-y-2">
+<!-- Active: Live Stream -->
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-[#d394ff] font-bold border-r-2 border-[#aa30fa] hover:bg-[#1f1f23] hover:text-[#bef264] transition-all duration-300 group" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sensors</span>
+<span class="text-sm">Live Stream</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-slate-400 font-medium hover:bg-[#1f1f23] hover:text-[#bef264] transition-all duration-300 group scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm">Schedule</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-slate-400 font-medium hover:bg-[#1f1f23] hover:text-[#bef264] transition-all duration-300 group scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">publish</span>
+<span class="text-sm">Submit</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-slate-400 font-medium hover:bg-[#1f1f23] hover:text-[#bef264] transition-all duration-300 group scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-sm">Leaderboard</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-lg text-slate-400 font-medium hover:bg-[#1f1f23] hover:text-[#bef264] transition-all duration-300 group scale-95 active:scale-90" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-sm">Profile</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-surface-container rounded-2xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Active Quorum</span>
+<span class="text-[10px] font-bold text-on-surface-variant">84%</span>
+</div>
+<div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[84%] shadow-[0_0_10px_rgba(89,238,80,0.5)]"></div>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Predicted Component) -->
+<header class="sticky top-0 z-40 w-full bg-[#0e0e11]/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 ml-64 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-['Plus_Jakarta_Sans'] font-semibold">
+<div class="flex items-center bg-surface-container-high rounded-full px-4 py-2 w-96 focus-within:ring-1 focus-within:ring-[#aa30fa] transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant" placeholder="Search streamers, categories..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<button class="flex items-center gap-2 bg-primary-dim/10 hover:bg-primary-dim/20 px-4 py-2 rounded-full border border-primary-dim/20 transition-all group">
+<span class="material-symbols-outlined text-primary-dim group-hover:scale-110 transition-transform">bolt</span>
+<span class="text-sm text-primary">Zap Points: 1,250</span>
+</button>
+<button class="hidden md:flex items-center gap-2 bg-[#9146FF]/20 hover:bg-[#9146FF]/40 px-4 py-2 rounded-full border border-[#9146FF]/40 backdrop-blur-md transition-all group shadow-[0_0_15px_rgba(145,70,255,0.3)] hover:shadow-[0_0_20px_rgba(145,70,255,0.5)]">
+<span class="material-symbols-outlined text-[#bf94ff] text-sm group-hover:rotate-12 transition-transform">link</span>
+<span class="text-[11px] font-bold text-white tracking-wide">Connect with Twitch</span>
+</button><div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-dim">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="Close up portrait of a young male gamer with neon blue and purple lighting on his face wearing a professional headset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMFpxV6nAqkU84Yn47S7-EzLYwP1YXmsHJc-eHryeQbj8A2D-IT9dAkHZhMMcRytdJn9SCCQ-AHOa6uRRGmqtvpg_rm-VpxBkrrJv-b2Fi1YJcTANpkK9oC26umaiWEnyMHT2VgFJBNC6kWWX8WGr1FSgvlsNvOplztOGm_1wPVgsLDUmUkJavFKjy2pAo3_SrjoN9K0oNE7sGcRolcimgtWoc0lukPR7nqQ7XPJf5KEnHqhSRvzpaashNK-SiAS5iBut5QOXt6uex"/>
+</div>
+<span class="material-symbols-outlined text-slate-300 hover:text-[#22d3ee] cursor-pointer transition-colors">notifications</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 p-8 min-h-screen">
+<div class="max-w-[1600px] mx-auto grid grid-cols-12 gap-8">
+<!-- Left Column: Player & Info -->
+<div class="col-span-12 xl:col-span-9 space-y-8">
+<!-- Stream Player Container -->
+<div class="relative aspect-video bg-black rounded-[1.5rem] overflow-hidden group shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+<img alt="Twitch Stream View" class="w-full h-full object-cover opacity-80" data-alt="Atmospheric wide shot of a high-end gaming setup with multiple curved monitors glowing with purple and cyan light in a dark room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYrqwebFQq27l5XeQSBXx8HBPX5oI8cHH9YfJseBzf8E5GcPhCQkn2_bE6y5ZVuKddjUTJb4BAxK8lAv_WXvoQ4GXzMCgHEhjKrKp-rggCRTuiwiP8fvu24XP0ZxjDhY7mOlnRm7yW0tAr0pcdtzTC79zExg6ryXvMDkiCF2hUBJ9qqtvhGr2uDV5cuCji9Bq90hv4WwJBqFcqGnaiyaiHfJVafslIzoIo9OoR0gpv8Ipc-h2VQrpq7my0yCHZ0LPd4y8EFegPF7X0"/>
+<div class="absolute inset-0 border-4 border-secondary/20 rounded-[1.5rem] pointer-events-none animate-pulse"></div>
+<!-- Glassmorphic Controls Overlay -->
+<div class="absolute bottom-6 left-6 right-6 p-6 rounded-2xl bg-surface-variant/40 backdrop-blur-xl border border-outline-variant/10 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Streamer Avatar" class="w-14 h-14 rounded-full border-2 border-secondary shadow-[0_0_15px_rgba(89,238,80,0.4)]" data-alt="Professional esports player avatar headshot with dramatic rim lighting and a serious expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKTRZb_JIFYbLOBAby1k5sg8O6K2jnF_r2TUap8g1eIH801kV6b4MNPIiVjkW30K5WHiIhDLWRSiLqCIa1xcOG5lWB9GWrNj2ByIQwKCFAMiTUnpeU-aQ3AZUFR_LlRWGsXfeu5Ac7p_GPv10zGWrQPeHfa_O3rLaX2j3hcY9FMPocE8a_ocIBGNTt_mV29jj5eeQT83fKlSYkfPUmfciiFpwez15knbDBAcujxa51PBkRK_VMWfRiDjzbESLyS6hesIEnNWopp7Mz"/>
+<div class="absolute -bottom-1 -right-1 bg-secondary text-on-secondary text-[8px] font-black px-1.5 py-0.5 rounded-sm">LIVE</div>
+</div>
+<div>
+<h3 class="font-headline font-extrabold text-xl tracking-tight text-on-surface">NeonViper_TV</h3>
+<p class="text-sm font-medium text-tertiary-dim">Cyberpunk 2077: Phantom Liberty</p>
+</div>
+</div>
+<!-- Voting Panel -->
+<div class="flex flex-col items-center gap-3 bg-surface-container-lowest/50 p-4 rounded-xl">
+<div class="flex items-center gap-6">
+<button class="group flex flex-col items-center transition-transform hover:scale-105">
+<div class="w-12 h-12 rounded-full bg-error-container/20 flex items-center justify-center border border-error/30 group-hover:bg-error-container/40 transition-colors">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">close</span>
+</div>
+<span class="text-[10px] font-bold mt-1 text-error">SKIP (12)</span>
+</button>
+<div class="h-10 w-[1px] bg-outline-variant/30"></div>
+<button class="group flex flex-col items-center transition-transform hover:scale-105">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center border border-secondary/30 group-hover:bg-secondary-container/40 transition-colors">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="text-[10px] font-bold mt-1 text-secondary">STAY (24)</span>
+</button>
+</div>
+<div class="text-[10px] font-medium text-on-surface-variant">
+<span class="text-tertiary-dim font-bold">12/5 votes</span> — quorum reached
+                            </div>
+</div>
+<!-- Timer -->
+<div class="text-right">
+<div class="text-3xl font-mono font-black text-tertiary shadow-[0_0_20px_rgba(226,255,254,0.3)]">04:42</div>
+<div class="text-[10px] font-bold text-on-tertiary-fixed-variant tracking-widest uppercase">Next Zap</div>
+</div>
+</div>
+</div>
+<!-- Stream Info Card -->
+<div class="bg-surface-container-low p-8 rounded-[1.5rem] flex flex-col md:flex-row items-start gap-8">
+<img alt="Game Art" class="w-32 h-44 object-cover rounded-xl shadow-2xl shrink-0" data-alt="Cinematic concept art of a futuristic cyberpunk city with vibrant neon signs and heavy rainfall at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7lDiGH0YOO6kkeyeA4K7WftCdRFKxI2-2SRjNajGYOCH9dKINSFmXe-kWVm7ybhQ1lRckArnVs7tmPASqDGXbBMuAM3FGCo2wrTS0N06kLi0OEphtwuN0V_9M-ux4yJ5iV-JJTt-Cs1WRa1Qv0YlASIkOAtbRPSm5OMSKvpl62Qg1F5zyvO_VLY_A05p58-rOtnyZ8-D8BWHZdFa2DxiWgVO23TNBoyHI15lieakE8bUD8C5hClIYaQmuddizcHTmPT6azxAqxxAp"/>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="text-3xl font-headline font-black tracking-tighter">Night City Exploration &amp; Gigs</h2>
+<div class="flex flex-wrap items-center gap-3 mt-2">
+<span class="px-2 py-1 bg-surface-container-highest text-[10px] font-bold rounded text-on-surface-variant">Action RPG</span>
+<span class="px-2 py-1 bg-surface-container-highest text-[10px] font-bold rounded text-on-surface-variant">English</span>
+<div class="hidden md:block h-4 w-[1px] bg-outline-variant"></div>
+<p class="text-sm text-on-surface-variant">Submitted by <span class="text-primary font-bold">ZapMaster_99</span></p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-3 rounded-xl bg-surface-container-high hover:bg-surface-bright transition-colors text-on-surface">
+<span class="material-symbols-outlined">share</span>
+</button>
+<button class="p-3 rounded-xl bg-surface-container-high hover:bg-surface-bright transition-colors text-on-surface">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8">
+<div class="bg-surface-container p-4 rounded-xl">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Time Aired</p>
+<p class="text-xl font-headline font-bold text-on-surface">1h 24m</p>
+</div>
+<div class="bg-surface-container p-4 rounded-xl">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total Zap Votes</p>
+<p class="text-xl font-headline font-bold text-secondary">3,102</p>
+</div>
+<div class="bg-surface-container p-4 rounded-xl">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Active Extensions</p>
+<p class="text-xl font-headline font-bold text-tertiary">14</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Up Next Section -->
+<div>
+<h4 class="text-lg font-headline font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">queue</span>
+                        Up Next in Queue
+                    </h4>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container p-4 rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="relative h-32 mb-4 rounded-xl overflow-hidden">
+<img alt="Queue Item 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Digital art of a fantasy landscape with floating islands and magical glowing crystals in soft pastel colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk-GrTLCLZK7-C6oHEqfZxi_Oh5DOfhnGEUWjhcJzcKEh4gvRRTlVMTOaVLm67hbb0K1LT5EehgHVN-jW_GrcPGy_gyT7bL1TS_JY6t87giGd_uSiwkfUK-rN3GlKztpI0oX7hhsK5q-PM7hWCizRXkt1QlmW-_mzcpPVAFHiCSEyhDw3Ny_QRz_m6P_Df0wTpfOc8tUpq5GZsaV8UXpXniGwX0iO578PzYW7bFvTyTxHuxn2vMWaGhc4co32VfLIMDlqdBeO6tfOZ"/>
+<div class="absolute top-2 left-2 bg-background/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold">POS #1</div>
+</div>
+<h5 class="font-bold text-on-surface truncate">Elden_Lord_99</h5>
+<p class="text-xs text-on-surface-variant">Elden Ring: Shadow of the Erdtree</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container p-4 rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="relative h-32 mb-4 rounded-xl overflow-hidden">
+<img alt="Queue Item 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Close up of a stylized mechanical robot eye with intricate details and glowing orange lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYyrL9NmQyHj7FoB00UtOQDzo4oLjwMkx4KyUfCVRG4iscOX5FU3ILjfE--FgJ9RpCRNHwchRJKd5fOntP_wbe8hJsCYqLM8Zf80Ew8E1xS5UehsSKctkgm_E96cS31DO2YmgFNY-lWMogrVIcIwAtLGGCErmw2UJsaDV3x53nEWNiD1FVPvoP7HpNIxcHiEBDse7gthsBW4s4e5bQPzkRrKpbJ7eMSSP1fL0EkqqqFGeBWPd2CIbJ0JR_UCQ99kDpo9PnJDY2YMmp"/>
+<div class="absolute top-2 left-2 bg-background/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold">POS #2</div>
+</div>
+<h5 class="font-bold text-on-surface truncate">RetroWave_Racer</h5>
+<p class="text-xs text-on-surface-variant">Turbo Overkill</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container p-4 rounded-2xl hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="relative h-32 mb-4 rounded-xl overflow-hidden">
+<img alt="Queue Item 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Top-down view of a modern colorful workspace with a mechanical keyboard and high-end gaming mouse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWzOKQtX0nmP-WWeb_mXu5wbw4XO0wJJDkyB4JwfQMhvH9Ng_TZA4wDA_aOWEgP_At-rV3MWN2Wc4Yul5CqS-fCqCMrTnbiFQNaoKBKf9AGx98eGuEucRn9YiSBxOmRAazrvegSIYRzwYC7L_FTSsvv0HzgReg8u3dNmWwPIXZU_sZgYH2Q_ALWokuDiYaemQX77FkiFZRq08wy5tAoByDZtiLcjDsy2inY-ggduIGcj4KdFVtaTSPtP6qKuKM2pQRMGu_-CA1Me1d"/>
+<div class="absolute top-2 left-2 bg-background/80 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold">POS #3</div>
+</div>
+<h5 class="font-bold text-on-surface truncate">Keyboard_Warrior</h5>
+<p class="text-xs text-on-surface-variant">Just Chatting</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Chat & Activity -->
+<aside class="col-span-12 xl:col-span-3 h-[calc(100vh-120px)] sticky top-24 flex flex-col gap-6">
+<!-- Twitch Chat Container -->
+<div class="flex-[3] twitch-chat-gradient rounded-[1.5rem] flex flex-col overflow-hidden shadow-2xl">
+<div class="p-4 bg-[#1f1f23]/50 backdrop-blur-md flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[#bf94ff]">chat</span>
+<h4 class="text-xs font-black uppercase tracking-widest text-on-surface">Stream Chat</h4>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-lg cursor-pointer hover:text-white transition-colors">settings</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+<!-- Mock Chat Messages -->
+<div class="text-xs leading-relaxed">
+<span class="font-black text-[#ff4a4a]">System:</span>
+<span class="text-on-surface-variant">Welcome to the Zap chatroom! Be respectful.</span>
+</div>
+<div class="text-xs leading-relaxed animate-in fade-in slide-in-from-bottom-1">
+<span class="font-black text-secondary">CyberNinja_</span>: 
+                            <span class="text-on-surface">This stream is cracked! Staying for sure.</span>
+</div>
+<div class="text-xs leading-relaxed">
+<span class="font-black text-primary">VoidWalker</span>: 
+                            <span class="text-on-surface">Anyone else hyped for the next Zap? ⚡️</span>
+</div>
+<div class="text-xs leading-relaxed">
+<span class="font-black text-[#ff8a00]">Solaris99</span>: 
+                            <span class="text-on-surface">LUL imagine skipping this gameplay. 💀</span>
+</div>
+<div class="text-xs leading-relaxed">
+<span class="font-black text-[#00d1ff]">GlitchArtist</span>: 
+                            <span class="text-on-surface">The colors in Night City look insane on this bitrate.</span>
+</div>
+<div class="text-xs leading-relaxed">
+<span class="font-black text-[#bef264]">ToxicPanda</span>: 
+                            <span class="text-on-surface">Voted STAY. Let's goooo!</span>
+</div>
+<div class="text-xs leading-relaxed">
+<span class="font-black text-tertiary">PixelPioneer</span>: 
+                            <span class="text-on-surface">Can we get a hype train?</span>
+</div>
+</div>
+<div class="p-4 bg-[#0e0e11]/30">
+<div class="flex items-center gap-2 bg-surface-container-low p-2 rounded-xl">
+<input class="bg-transparent border-none text-xs w-full focus:ring-0 placeholder:text-on-surface-variant/50" placeholder="Send a message..." type="text"/>
+<div class="flex gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-lg cursor-pointer hover:text-white">sentiment_satisfied</span>
+<span class="material-symbols-outlined text-primary text-lg cursor-pointer hover:scale-110 transition-transform">send</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Integrated Activity Feed Tab-like area -->
+<div class="flex-[2] bg-surface-container/60 backdrop-blur-md rounded-[1.5rem] flex flex-col overflow-hidden">
+<div class="p-4 border-b border-white/5 flex items-center justify-between">
+<h4 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">flash_on</span>
+                            Live Feed
+                        </h4>
+<span class="text-[10px] font-bold text-on-surface-variant">Real-time</span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+<div class="flex gap-3">
+<img alt="User" class="w-6 h-6 rounded-md object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_8sIpvWzzXHNk0vvbyvwFsYVqyXUJX1x_EJrF1gE8rnPbLUMa2ZUchRQvwIjhWe60w3PnTKHb8u26_gZJK3_gG2LglwiAMRKZaBR3BP89CzJjysJCx1B-2RIQSIjc6FB-KDb6v9cMHMIBCsS7vfYyaq2A_aNAfrwkTC73M0XmBl9nWBcBjESHYutOLS6_yC4LpBl2zFHogc1DV-a_7MLmv6dWoeZN3NbP0UzUxdN5xYJgZs24JeBojAfpabXbkFtsVJ6xNHZkbOsp"/>
+<div class="flex-1">
+<p class="text-[10px] leading-tight"><span class="font-bold text-tertiary">PixelPioneer</span> voted <span class="text-secondary font-bold">STAY</span></p>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="w-6 h-6 rounded-md bg-error-container/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-error text-[10px]">close</span>
+</div>
+<div class="flex-1">
+<p class="text-[10px] leading-tight"><span class="text-error font-bold">System</span>: Skipped <span class="italic">Minecraft_Lover</span></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Community Milestone -->
+<div class="bg-gradient-to-br from-primary-dim/20 to-transparent p-5 rounded-[1.5rem] border border-primary-dim/10 relative overflow-hidden group shrink-0">
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-6xl text-primary-dim/5 rotate-12 group-hover:rotate-0 transition-transform duration-700">stars</span>
+<h5 class="text-[10px] font-bold text-primary mb-1 uppercase tracking-[0.2em]">Goal</h5>
+<p class="text-sm font-headline font-extrabold leading-tight mb-2">50k Zaps Milestone!</p>
+<div class="w-full h-1 bg-white/5 rounded-full overflow-hidden mb-2">
+<div class="h-full bg-primary w-[92%] shadow-[0_0_8px_rgba(211,148,255,0.6)]"></div>
+</div>
+<span class="text-[9px] font-bold text-on-surface-variant">+4.2k others contributing</span>
+</div>
+</aside>
+</div>
+</main>
+<!-- Contextual Floating Action Button -->
+<button class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-tr from-primary to-primary-dim rounded-full flex items-center justify-center text-on-primary-fixed shadow-[0_10px_40px_rgba(170,48,250,0.5)] hover:scale-110 active:scale-90 transition-all z-50 group">
+<span class="material-symbols-outlined text-3xl group-hover:rotate-12 transition-transform" style="font-variation-settings: 'FILL' 1;">add</span>
+<div class="absolute -top-12 right-0 bg-surface-container-highest px-3 py-1 rounded-lg text-[10px] font-bold text-primary border border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Submit Stream</div>
+</button>
+</body></html>

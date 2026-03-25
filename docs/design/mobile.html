@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<title>TwitchZap - Live View</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed-variant": "#470071",
+            "error-dim": "#d73357",
+            "on-surface-variant": "#acaaae",
+            "on-tertiary-fixed-variant": "#326f6f",
+            "secondary-container": "#006e0a",
+            "surface-variant": "#25252a",
+            "tertiary-container": "#b9f6f5",
+            "on-tertiary": "#2a6868",
+            "inverse-on-surface": "#555458",
+            "tertiary-dim": "#9ddad9",
+            "on-primary": "#4a0076",
+            "on-background": "#f0edf1",
+            "primary": "#d394ff",
+            "surface-container-high": "#1f1f23",
+            "on-error": "#490013",
+            "on-error-container": "#ffb2b9",
+            "on-primary-fixed": "#000000",
+            "secondary-fixed": "#59ee50",
+            "outline-variant": "#48474b",
+            "on-primary-container": "#39005c",
+            "surface-container-low": "#131316",
+            "surface-container": "#19191d",
+            "primary-fixed": "#cb80ff",
+            "inverse-surface": "#fcf8fd",
+            "tertiary-fixed-dim": "#b3f1f0",
+            "outline": "#767579",
+            "error": "#ff6e84",
+            "on-secondary-container": "#e6ffdb",
+            "surface-container-highest": "#25252a",
+            "tertiary-fixed": "#c1fffe",
+            "on-secondary-fixed-variant": "#005f07",
+            "primary-dim": "#aa30fa",
+            "surface-tint": "#d394ff",
+            "background": "#0e0e11",
+            "surface-container-lowest": "#000000",
+            "surface-dim": "#0e0e11",
+            "on-secondary-fixed": "#003e03",
+            "on-surface": "#f0edf1",
+            "primary-fixed-dim": "#c26bff",
+            "on-tertiary-fixed": "#0b5252",
+            "inverse-primary": "#9100e0",
+            "on-secondary": "#005406",
+            "secondary-fixed-dim": "#49e043",
+            "secondary-dim": "#49e043",
+            "tertiary": "#e2fffe",
+            "secondary": "#59ee50",
+            "surface": "#0e0e11",
+            "on-tertiary-container": "#206060",
+            "surface-bright": "#2c2c30",
+            "error-container": "#a70138",
+            "primary-container": "#cb80ff"
+          },
+          fontFamily: {
+            "headline": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Inter", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body min-h-screen flex flex-col antialiased">
+<header class="sticky top-0 z-50 bg-surface-container-low/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between shadow-[0_4px_32px_rgba(211,148,255,0.05)]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center text-on-primary-fixed shadow-[0_0_16px_rgba(211,148,255,0.3)]">
+<span class="material-symbols-outlined text-[20px]" data-icon="bolt">bolt</span>
+</div>
+<h1 class="font-headline font-bold text-lg tracking-tight">TwitchZap</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="text-[10px] font-label text-on-surface-variant uppercase tracking-wider">Zap Points</span>
+<span class="font-headline font-bold text-primary text-sm shadow-[0_0_8px_rgba(211,148,255,0.2)]">1,250</span>
+</div>
+<button class="bg-surface-container-highest hover:bg-surface-bright text-primary text-sm font-medium px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors">
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"></path></svg>
+        Connect
+      </button>
+</div>
+</header>
+<main class="flex-1 flex flex-col pb-20">
+<div class="relative w-full aspect-video bg-surface-container-lowest shadow-[0_0_0_2px_rgba(89,238,80,0.4)] shadow-secondary/40">
+<div class="absolute inset-0 bg-center bg-cover" data-alt="High quality screenshot of a fast-paced futuristic racing game with neon colors and motion blur" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCMyDDSzXghjVv93y4WKbS3nNlgnnQwjxSWbVOD1oDYz15HFx70dTVVdfrYTm_sIIIXjSmak79-qnfP7kSdviQ8xTsjhk-csKJF3IT_jo9nKIjNGhVrMNhspLEAwpEfL5AxtyqKolWcX4ecxFSb_4_K4isNGA4MwXQWMxUyBE4pCxTBb5gRY4frfwi3mAOWPfE9PDmv-z7U4YNHcBnhQnwp5OJiAVwCNt8QW37n_Z-65HiMn7aZXyC7dXY-5jnLqiPcS8tMqWj0SiuH');"></div>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary-fixed font-headline font-bold text-[10px] px-2 py-0.5 rounded uppercase tracking-wider animate-pulse flex items-center gap-1 shadow-[0_0_12px_rgba(89,238,80,0.6)]">
+<div class="w-1.5 h-1.5 rounded-full bg-on-secondary-fixed"></div>
+        LIVE
+      </div>
+<div class="absolute top-2 right-2 bg-surface-container-lowest/60 backdrop-blur-md text-on-surface text-xs px-2 py-1 rounded flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-error" data-icon="visibility">visibility</span>
+        14.2k
+      </div>
+<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+<button class="w-16 h-16 rounded-full bg-surface-container-lowest/40 backdrop-blur-md flex items-center justify-center text-on-surface hover:bg-surface-container-highest/60 transition-colors">
+<span class="material-symbols-outlined text-[32px]" data-icon="pause">pause</span>
+</button>
+</div>
+<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/80 to-transparent p-3 pt-12 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-cover bg-center border border-outline-variant/30" data-alt="Portrait of a gamer wearing a headset in a dark room illuminated by colorful screen glare" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAZA6Spl2eOACqgpjuiKeyWPtLgnkAK5MNu5XVu6ZlJiDN09CJI9HBH0QFRF1iyE-w4WyGbt7Z_Ru_QEY2hDdVYFGAOmyjp0C56czsWGW8kzhHBugxWrrEmaEXzCPGjG2RFoNbuZVxS7MLnWHFHi_s6f5PtnKu-BQyWSTEeRqE0Engr0HU5peNoK7h6CMvxS_wFZL0dOPukdboTdX0tT-gB3MFejeGn4O83guuT0gqSducabDv4wEBarMHi-jjJYYBknIyvOL0ge4Un');"></div>
+<div>
+<p class="font-headline font-bold text-sm text-on-surface leading-tight">NeonRider_99</p>
+<p class="text-[10px] text-tertiary-dim truncate max-w-[120px]">Cyber Drift 2077</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-highest/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-outline-variant/20 shadow-[0_4px_16px_rgba(0,0,0,0.4)]">
+<div class="text-center">
+<span class="block text-[10px] text-on-surface-variant uppercase tracking-wider mb-0.5">Time Left</span>
+<div class="font-headline font-bold text-primary flex items-baseline gap-0.5">
+<span class="text-base leading-none">04</span><span class="text-xs text-primary/70">:</span><span class="text-base leading-none">28</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-surface-container-highest/60 backdrop-blur-md border border-outline-variant/30 hover:bg-surface-bright/80 text-on-surface py-2 rounded-md font-headline font-bold text-sm flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[18px] text-error-dim" data-icon="skip_next">skip_next</span>
+            SKIP <span class="text-xs font-body font-normal text-on-surface-variant ml-1">(42%)</span>
+</button>
+<button class="flex-1 bg-gradient-to-r from-primary to-primary-dim hover:from-primary-fixed hover:to-primary text-on-primary-fixed py-2 rounded-md font-headline font-bold text-sm flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(211,148,255,0.2)] transition-all">
+<span class="material-symbols-outlined text-[18px]" data-icon="thumb_up">thumb_up</span>
+            STAY <span class="text-xs font-body font-normal text-on-primary-fixed/70 ml-1">(58%)</span>
+</button>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div>
+<h2 class="font-headline font-bold text-lg mb-1">Midnight City Circuit - High Stakes</h2>
+<div class="flex items-center gap-2 text-sm text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-tertiary" data-icon="sports_esports">sports_esports</span> Racing</span>
+<span>•</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary" data-icon="person">person</span> Submitted by: <span class="text-primary-dim font-medium">ZapFan1</span></span>
+</div>
+</div>
+<button class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="bg-surface-container-low p-2 rounded-lg text-center">
+<span class="block text-xs text-on-surface-variant mb-1">Total Votes</span>
+<span class="font-headline font-bold text-on-surface text-base">8,492</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg text-center">
+<span class="block text-xs text-on-surface-variant mb-1">Zap Power</span>
+<span class="font-headline font-bold text-primary text-base">450</span>
+</div>
+<div class="bg-surface-container-low p-2 rounded-lg text-center">
+<span class="block text-xs text-on-surface-variant mb-1">Est. End</span>
+<span class="font-headline font-bold text-tertiary-dim text-base">10:45</span>
+</div>
+</div>
+</div>
+<div class="flex-1 bg-surface-container-low flex flex-col">
+<div class="flex border-b border-surface-container-highest">
+<button class="flex-1 py-3 font-headline font-bold text-sm text-primary border-b-2 border-primary-dim relative">
+          Stream Chat
+          <div class="absolute inset-x-0 bottom-0 h-[2px] bg-primary-dim shadow-[0_-2px_8px_rgba(170,48,250,0.5)]"></div>
+</button>
+<button class="flex-1 py-3 font-headline font-medium text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+          Live Feed
+        </button>
+</div>
+<div class="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+<div class="flex items-start gap-2">
+<span class="font-bold text-sm text-tertiary-dim shrink-0">CyberNinja:</span>
+<span class="text-sm text-on-surface leading-tight">that drift was insane! 🚗💨</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="font-bold text-sm text-[#ff6e84] shrink-0">SpeedDemon:</span>
+<span class="text-sm text-on-surface leading-tight">skip this track is boring</span>
+</div>
+<div class="flex items-start gap-2 bg-surface-container-highest/40 p-1.5 rounded -mx-1.5">
+<span class="font-bold text-sm text-primary-fixed shrink-0 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]" data-icon="star">star</span>
+             NeonRider_99:
+           </span>
+<span class="text-sm text-on-surface leading-tight">focusing on the next corner, hold on chat</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="font-bold text-sm text-secondary shrink-0">ZapFan1:</span>
+<span class="text-sm text-on-surface leading-tight">STAY STAY STAY</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="font-bold text-sm text-tertiary-dim shrink-0">CyberNinja:</span>
+<span class="text-sm text-on-surface leading-tight">VOTE STAY GUYS</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container mt-auto">
+<div class="flex items-center gap-2 bg-surface-container-highest rounded-full px-4 py-2 relative">
+<input class="flex-1 bg-transparent border-none text-sm text-on-surface placeholder-on-surface-variant focus:ring-0 p-0 h-8" placeholder="Send a message..." type="text"/>
+<button class="text-primary hover:text-primary-dim transition-colors">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+<div class="absolute bottom-0 left-4 right-4 h-[2px] bg-primary-dim/0 transition-all duration-300 peer-focus:bg-primary-dim peer-focus:shadow-[0_-2px_8px_rgba(170,48,250,0.5)]"></div>
+</div>
+</div>
+</div>
+</main>
+<div class="fixed bottom-0 w-full z-50">
+<div class="flex gap-2 border-t border-surface-container-highest bg-surface-container-low px-4 pb-safe pt-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="House">
+<svg fill="currentColor" height="24px" viewbox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M218.83,103.77l-80-75.48a1.14,1.14,0,0,1-.11-.11,16,16,0,0,0-21.53,0l-.11.11L37.17,103.77A16,16,0,0,0,32,115.55V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V160h32v48a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V115.55A16,16,0,0,0,218.83,103.77ZM208,208H160V160a16,16,0,0,0-16-16H112a16,16,0,0,0-16,16v48H48V115.55l.11-.1L128,40l79.9,75.43.11.1Z"></path>
+</svg>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary relative" href="#">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-primary/20 rounded-full blur-xl"></div>
+<div class="flex h-8 items-center justify-center" data-icon="PlayCircle">
+<svg fill="currentColor" height="24px" viewbox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M128,24A104,104,0,1,0,232,128,104.13,104.13,0,0,0,128,24Zm36.44,110.66-48,32A8.05,8.05,0,0,1,112,168a8,8,0,0,1-8-8V96a8,8,0,0,1,12.44-6.66l48,32a8,8,0,0,1,0,13.32Z"></path>
+</svg>
+</div>
+<p class="text-[10px] font-bold leading-normal tracking-wide">Live Now</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="Calendar">
+<svg fill="currentColor" height="24px" viewbox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Zm-96-88v64a8,8,0,0,1-16,0V132.94l-4.42,2.22a8,8,0,0,1-7.16-14.32l16-8A8,8,0,0,1,112,120Zm59.16,30.45L152,176h16a8,8,0,0,1,0,16H136a8,8,0,0,1-6.4-12.8l28.78-38.37A8,8,0,1,0,145.07,132a8,8,0,1,1-13.85-8A24,24,0,0,1,176,136,23.76,23.76,0,0,1,171.16,150.45Z"></path>
+</svg>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Schedule</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-on-surface-variant hover:text-on-surface transition-colors" href="#">
+<div class="flex h-8 items-center justify-center" data-icon="User">
+<svg fill="currentColor" height="24px" viewbox="0 0 256 256" width="24px" xmlns="http://www.w3.org/2000/svg">
+<path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path>
+</svg>
+</div>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Profile</p>
+</a>
+</div>
+</div>
+</body></html>
