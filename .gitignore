@@ -41,3 +41,6 @@ next-env.d.ts
 
 # memory system
 .memory/
+
+# VibeTuga orchestrator files
+.env.local
