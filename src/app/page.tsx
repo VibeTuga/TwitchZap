@@ -1,15 +1,36 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useBroadcast } from "@/hooks/useBroadcast";
 import { useVoting } from "@/hooks/useVoting";
 import { usePresence } from "@/hooks/usePresence";
 import { useWatchTime } from "@/hooks/useWatchTime";
-import { StreamPlayer } from "@/components/StreamPlayer";
-import { VotingPanel } from "@/components/VotingPanel";
-import { Confetti } from "@/components/Confetti";
-import { Skeleton } from "@/components/ui/skeleton-card";
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton-card";
+
+const StreamPlayer = dynamic(
+  () =>
+    import("@/components/StreamPlayer").then((mod) => mod.StreamPlayer),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="w-full aspect-video md:rounded-2xl" />,
+  }
+);
+
+const VotingPanel = dynamic(
+  () =>
+    import("@/components/VotingPanel").then((mod) => mod.VotingPanel),
+  {
+    ssr: false,
+    loading: () => <SkeletonCard />,
+  }
+);
+
+const Confetti = dynamic(
+  () => import("@/components/Confetti").then((mod) => mod.Confetti),
+  { ssr: false }
+);
 
 export default function LiveViewPage() {
   const { broadcast, loading, isReconnecting } = useBroadcast();

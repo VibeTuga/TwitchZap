@@ -250,7 +250,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ rankings, user_rank: userRank });
+  return NextResponse.json(
+    { rankings, user_rank: userRank },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+      },
+    }
+  );
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
