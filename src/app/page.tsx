@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useBroadcast } from "@/hooks/useBroadcast";
 import { useVoting } from "@/hooks/useVoting";
-import { usePresence } from "@/hooks/usePresence";
+
 import { useWatchTime } from "@/hooks/useWatchTime";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton-card";
 
@@ -37,7 +37,6 @@ export default function LiveViewPage() {
   const { counts, hasVoted, isSubmitting, castVote, setHasVoted } = useVoting(
     broadcast?.id ?? null
   );
-  const { viewerCount } = usePresence(broadcast?.id ?? null);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useWatchTime(broadcast?.id ?? null);
@@ -119,15 +118,9 @@ export default function LiveViewPage() {
         />
       </div>
 
-      {/* Viewer count */}
-      <div className="flex items-center justify-between px-5 md:px-1">
-        <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-          <span className="w-2 h-2 rounded-full bg-error animate-pulse" />
-          <span>
-            {viewerCount} viewer{viewerCount !== 1 ? "s" : ""}
-          </span>
-        </div>
-        {broadcast.submitter && (
+      {/* Submitted by */}
+      {broadcast.submitter && (
+        <div className="flex items-center justify-end px-5 md:px-1">
           <p className="text-xs text-on-surface-variant">
             Submitted by{" "}
             <span className="text-on-surface font-medium">
@@ -135,8 +128,8 @@ export default function LiveViewPage() {
                 broadcast.submitter.twitchUsername}
             </span>
           </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Voting Panel */}
       <div className="px-4 md:px-0">
