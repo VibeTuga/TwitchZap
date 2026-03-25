@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useSoundEffects } from "@/lib/sounds";
 import { toast } from "sonner";
 import type { BroadcastState } from "@/hooks/useBroadcast";
 
@@ -50,6 +51,7 @@ export function VotingPanel({
   onExtension,
 }: VotingPanelProps) {
   const reduced = useReducedMotion();
+  const { playVoteSound, playExtensionSound } = useSoundEffects();
   const [selectedVote, setSelectedVote] = useState<"skip" | "stay" | null>(
     null
   );
@@ -84,10 +86,11 @@ export function VotingPanel({
     if (broadcast.status === "extended") {
       setShowExtension(true);
       onExtension?.();
+      playExtensionSound();
       const t = setTimeout(() => setShowExtension(false), 1500);
       return () => clearTimeout(t);
     }
-  }, [broadcast.status, broadcast.extensionsCount, onExtension]);
+  }, [broadcast.status, broadcast.extensionsCount, onExtension, playExtensionSound]);
 
   const handleVote = useCallback(
     async (vote: "skip" | "stay") => {
@@ -97,8 +100,9 @@ export function VotingPanel({
         description:
           vote === "stay" ? "You voted to keep watching" : "You voted to skip",
       });
+      playVoteSound();
     },
-    [onVote]
+    [onVote, playVoteSound]
   );
 
   const isVotingOpen =
