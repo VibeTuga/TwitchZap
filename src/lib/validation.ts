@@ -24,7 +24,7 @@ export function validateOrigin(request: Request): boolean {
   }
 
   // No origin or referer header — likely a server-side or same-origin request
-  return false;
+  return true;
 }
 
 export function isValidTwitchUsername(value: unknown): value is string {
