@@ -11,15 +11,19 @@ export function validateOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
 
-  const allowedOrigin = new URL(appUrl).origin.replace(/\/$/, "");
+  const allowedHostname = new URL(appUrl).hostname;
 
   if (origin) {
-    return origin.replace(/\/$/, "") === allowedOrigin;
+    try {
+      return new URL(origin).hostname === allowedHostname;
+    } catch {
+      return false;
+    }
   }
 
   if (referer) {
     try {
-      return new URL(referer).origin.replace(/\/$/, "") === allowedOrigin;
+      return new URL(referer).hostname === allowedHostname;
     } catch {
       return false;
     }
