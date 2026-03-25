@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, useRef } from "react";
+import { useSyncExternalStore, useCallback, useRef, useEffect } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const STORAGE_KEY = "soundEnabled";
@@ -137,7 +137,10 @@ export function useSoundEffects() {
   const enabled = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const reducedMotion = useReducedMotion();
   const canPlayRef = useRef(false);
-  canPlayRef.current = enabled && !reducedMotion;
+
+  useEffect(() => {
+    canPlayRef.current = enabled && !reducedMotion;
+  }, [enabled, reducedMotion]);
 
   const getContext = useCallback(() => {
     if (!canPlayRef.current) return null;

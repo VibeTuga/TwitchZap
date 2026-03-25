@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSoundEffects } from "@/lib/sounds";
@@ -140,9 +141,11 @@ export function VotingPanel({
       {/* Stream info bar */}
       <div className="p-4 flex items-center gap-4">
         {broadcast.stream?.twitchAvatarUrl && (
-          <img
+          <Image
             src={broadcast.stream.twitchAvatarUrl}
             alt=""
+            width={40}
+            height={40}
             className="w-10 h-10 rounded-lg"
           />
         )}
