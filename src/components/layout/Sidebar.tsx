@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/", label: "Live Stream", icon: "sensors", filled: true },
@@ -13,6 +15,60 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [quorum, setQuorum] = useState(0);
+
+  useEffect(() => {
+    async function fetchQuorum() {
+      try {
+        const res = await fetch("/api/broadcasts");
+        const data = await res.json();
+        if (data.broadcast) {
+          const total = data.broadcast.totalVotes ?? 0;
+          setQuorum(Math.min(total / 5, 1) * 100);
+        }
+      } catch {
+        // Silently fail
+      }
+    }
+
+    fetchQuorum();
+
+    const supabase = createClient();
+    const channel = supabase.channel("sidebar-quorum").on(
+      "broadcast",
+      { event: "vote_update" },
+      (payload) => {
+        const data = payload.payload as { total?: number };
+        if (data.total !== undefined) {
+          setQuorum(Math.min(data.total / 5, 1) * 100);
+        }
+      }
+    ).on(
+      "broadcast",
+      { event: "new_stream" },
+      () => {
+        setQuorum(0);
+      }
+    ).on(
+      "broadcast",
+      { event: "stream_skipped" },
+      () => {
+        setQuorum(0);
+      }
+    ).on(
+      "broadcast",
+      { event: "stream_ended" },
+      () => {
+        setQuorum(0);
+      }
+    );
+
+    channel.subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-surface-container-low font-headline tracking-tight flex-col py-6 px-4 z-50 hidden lg:flex">
@@ -73,13 +129,13 @@ export function Sidebar() {
             Active Quorum
           </span>
           <span className="text-[10px] font-bold text-on-surface-variant">
-            0%
+            {Math.round(quorum)}%
           </span>
         </div>
         <div className="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
           <div
-            className="h-full bg-secondary shadow-[0_0_10px_rgba(89,238,80,0.5)]"
-            style={{ width: "0%" }}
+            className="h-full bg-secondary shadow-[0_0_10px_rgba(89,238,80,0.5)] transition-all duration-500"
+            style={{ width: `${Math.round(quorum)}%` }}
           />
         </div>
       </div>
