@@ -15,12 +15,7 @@ export function validateOrigin(request: Request): boolean {
 
   if (origin) {
     try {
-      const requestHostname = new URL(origin).hostname;
-      if (requestHostname !== allowedHostname) {
-        console.warn(`[validateOrigin] REJECTED: origin="${origin}" (hostname="${requestHostname}") vs allowed="${allowedHostname}" (from APP_URL="${appUrl}")`);
-        return false;
-      }
-      return true;
+      return new URL(origin).hostname === allowedHostname;
     } catch {
       return false;
     }

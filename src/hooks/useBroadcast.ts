@@ -166,8 +166,19 @@ export function useBroadcast() {
 
     channel.subscribe();
 
+    // Fallback polling so broadcast state stays current even if
+    // Realtime events are missed (e.g. network hiccup, cold start)
+    const interval = setInterval(fetchBroadcast, 15_000);
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fetchBroadcast();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [fetchBroadcast]);
 
