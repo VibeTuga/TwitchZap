@@ -6,7 +6,7 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  createServerClient(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -28,6 +28,11 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
+
+  // IMPORTANT: call getUser() to refresh expired session tokens.
+  // Without this, the access token expires and server-side auth fails
+  // even though the user appears logged in on the client.
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }
