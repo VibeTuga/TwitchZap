@@ -10,7 +10,13 @@ import {
   queue,
   streams,
 } from "@/db/schema";
-import { count, sum, eq, inArray, desc, gt } from "drizzle-orm";
+import { count, sum, eq, inArray, desc, gt, sql } from "drizzle-orm";
+import { getQueue } from "@/lib/queue";
+import {
+  AdminQueueRemoveButton,
+  AdminBroadcastActions,
+  AdminUserRoleSelect,
+} from "./AdminActions";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -30,6 +36,9 @@ export default async function AdminPage() {
     totalWatchMinutesResult,
     queueDepthResult,
     recentBroadcasts,
+    waitingQueue,
+    activeBroadcastResult,
+    allUsersResult,
   ] = await Promise.all([
     db.select({ value: count() }).from(users),
 
@@ -72,6 +81,36 @@ export default async function AdminPage() {
       .innerJoin(streams, eq(broadcasts.streamId, streams.id))
       .orderBy(desc(broadcasts.startedAt))
       .limit(10),
+
+    getQueue("waiting"),
+
+    db
+      .select({
+        id: broadcasts.id,
+        status: broadcasts.status,
+        startedAt: broadcasts.startedAt,
+        scheduledEndAt: broadcasts.scheduledEndAt,
+        extensionsCount: broadcasts.extensionsCount,
+        streamName: streams.twitchDisplayName,
+        streamUsername: streams.twitchUsername,
+      })
+      .from(broadcasts)
+      .innerJoin(streams, eq(broadcasts.streamId, streams.id))
+      .where(sql`${broadcasts.status} IN ('live', 'voting', 'extended')`)
+      .limit(1),
+
+    db
+      .select({
+        id: users.id,
+        twitchUsername: users.twitchUsername,
+        twitchDisplayName: users.twitchDisplayName,
+        twitchAvatarUrl: users.twitchAvatarUrl,
+        role: users.role,
+        zapPoints: users.zapPoints,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt)),
   ]);
 
   const totalUsers = totalUsersResult[0]?.value ?? 0;
@@ -113,6 +152,14 @@ export default async function AdminPage() {
       value: queueDepth.toLocaleString(),
     },
   ];
+
+  const activeBroadcast = activeBroadcastResult[0] ?? null;
+
+  const roleColors: Record<string, string> = {
+    admin: "bg-red-500/20 text-red-400",
+    moderator: "bg-amber-500/20 text-amber-400",
+    member: "bg-cyan-500/20 text-cyan-400",
+  };
 
   const statusColors: Record<string, string> = {
     completed: "text-green-400",
@@ -224,6 +271,199 @@ export default async function AdminPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+      {/* Queue Management */}
+      <div className="bg-surface-container rounded-2xl p-5">
+        <h2 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary-dim text-xl">
+            queue
+          </span>
+          Queue Management
+        </h2>
+
+        {waitingQueue.length === 0 ? (
+          <p className="text-on-surface-variant text-sm py-4 text-center">
+            No streams in queue
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {waitingQueue.map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-high/50"
+              >
+                <span className="text-xs font-bold text-on-surface-variant w-8 text-center shrink-0">
+                  #{entry.position}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-on-surface truncate">
+                    {entry.stream?.twitchDisplayName ||
+                      entry.stream?.twitchUsername ||
+                      "Unknown"}
+                  </p>
+                  <p className="text-xs text-on-surface-variant">
+                    {entry.stream?.category || "No category"}
+                    {" · submitted by "}
+                    {entry.submittedBy?.twitchDisplayName ||
+                      entry.submittedBy?.twitchUsername ||
+                      "Unknown"}
+                    {" · "}
+                    {new Date(entry.submittedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <AdminQueueRemoveButton
+                  queueEntryId={entry.id}
+                  streamName={
+                    entry.stream?.twitchDisplayName ||
+                    entry.stream?.twitchUsername ||
+                    "Unknown"
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Broadcast Control */}
+      <div className="bg-surface-container rounded-2xl p-5">
+        <h2 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary-dim text-xl">
+            live_tv
+          </span>
+          Broadcast Control
+        </h2>
+
+        {!activeBroadcast ? (
+          <p className="text-on-surface-variant text-sm py-4 text-center">
+            No active broadcast
+          </p>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-high/50">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-on-surface truncate">
+                  {activeBroadcast.streamName ||
+                    activeBroadcast.streamUsername}
+                </p>
+                <p className="text-xs text-on-surface-variant">
+                  Status:{" "}
+                  <span
+                    className={`font-semibold capitalize ${statusColors[activeBroadcast.status] || "text-on-surface-variant"}`}
+                  >
+                    {activeBroadcast.status}
+                  </span>
+                  {" · "}
+                  Ends{" "}
+                  {new Date(activeBroadcast.scheduledEndAt).toLocaleTimeString(
+                    "en-US",
+                    { hour: "2-digit", minute: "2-digit" }
+                  )}
+                  {activeBroadcast.extensionsCount > 0 &&
+                    ` · +${activeBroadcast.extensionsCount} ext`}
+                </p>
+              </div>
+            </div>
+            <AdminBroadcastActions
+              broadcastId={activeBroadcast.id}
+              streamName={
+                activeBroadcast.streamName ||
+                activeBroadcast.streamUsername
+              }
+            />
+          </div>
+        )}
+      </div>
+
+      {/* User Management */}
+      <div className="bg-surface-container rounded-2xl p-5">
+        <h2 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary-dim text-xl">
+            group
+          </span>
+          User Management
+        </h2>
+
+        {allUsersResult.length === 0 ? (
+          <p className="text-on-surface-variant text-sm py-4 text-center">
+            No users yet
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-on-surface-variant">
+                  <th className="pb-3 font-medium">User</th>
+                  <th className="pb-3 font-medium">Role</th>
+                  <th className="pb-3 font-medium text-right">Zap Points</th>
+                  <th className="pb-3 font-medium text-right">Joined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {allUsersResult.map((u) => (
+                  <tr key={u.id}>
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2.5">
+                        {u.twitchAvatarUrl ? (
+                          <img
+                            src={u.twitchAvatarUrl}
+                            alt=""
+                            className="w-7 h-7 rounded-full shrink-0"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-surface-container-high shrink-0 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-on-surface-variant text-sm">
+                              person
+                            </span>
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-on-surface font-medium truncate text-sm">
+                            {u.twitchDisplayName || u.twitchUsername}
+                          </p>
+                          {u.twitchDisplayName && u.twitchDisplayName !== u.twitchUsername && (
+                            <p className="text-xs text-on-surface-variant truncate">
+                              @{u.twitchUsername}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-md text-xs font-semibold ${roleColors[u.role] || "bg-white/10 text-on-surface-variant"}`}
+                        >
+                          {u.role}
+                        </span>
+                        <AdminUserRoleSelect
+                          userId={u.id}
+                          currentRole={u.role}
+                        />
+                      </div>
+                    </td>
+                    <td className="py-3 pr-3 text-right text-on-surface tabular-nums">
+                      {u.zapPoints.toLocaleString()}
+                    </td>
+                    <td className="py-3 text-right text-on-surface-variant text-xs">
+                      {new Date(u.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
