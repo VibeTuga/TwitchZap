@@ -3,52 +3,34 @@
 import { useState, useEffect, useMemo } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 import { UserMenu } from "./UserMenu";
 import { ZapPoints } from "@/components/gamification/ZapPoints";
 import { useSoundEffects } from "@/lib/sounds";
 import { usePresence } from "@/hooks/usePresence";
 
 export function TopBar() {
+  const { user } = useAuth();
   const [zapPoints, setZapPoints] = useState<number | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const supabase = useMemo(() => createClient(), []);
   const { soundEnabled, toggleSound } = useSoundEffects();
-  const { viewerCount } = usePresence(userId);
+  const { viewerCount } = usePresence(user?.id ?? null);
 
   useEffect(() => {
-    async function fetchPoints() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        setZapPoints(null);
-        setUserId(null);
-        return;
-      }
-
-      setUserId(user.id);
-
-      const { data } = await supabase
-        .from("users")
-        .select("zap_points")
-        .eq("id", user.id)
-        .single();
-
-      if (data) {
-        setZapPoints(data.zap_points);
-      }
+    if (!user) {
+      setZapPoints(null);
+      return;
     }
 
-    fetchPoints();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      fetchPoints();
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    supabase
+      .from("users")
+      .select("zap_points")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setZapPoints(data.zap_points);
+      });
+  }, [user, supabase]);
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 h-14 md:h-16 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">

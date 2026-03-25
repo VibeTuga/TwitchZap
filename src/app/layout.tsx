@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { AuthProvider } from "@/components/AuthProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -51,15 +52,17 @@ export default function RootLayout({
           src="https://player.twitch.tv/js/embed/v1.js"
           strategy="afterInteractive"
         />
-        <Sidebar />
-        <div className="lg:ml-64 min-h-screen flex flex-col">
-          <TopBar />
-          <main className="px-4 md:px-8 pt-4 md:pt-8 pb-24 lg:pb-8 flex-1">
-            <div className="max-w-[1600px] mx-auto">{children}</div>
-          </main>
-          <MobileNav />
-        </div>
-        <Toaster />
+        <AuthProvider>
+          <Sidebar />
+          <div className="lg:ml-64 min-h-screen flex flex-col">
+            <TopBar />
+            <main className="px-4 md:px-8 pt-4 md:pt-8 pb-24 lg:pb-8 flex-1">
+              <div className="max-w-[1600px] mx-auto">{children}</div>
+            </main>
+            <MobileNav />
+          </div>
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -66,10 +66,10 @@ export async function GET(request: NextRequest) {
     // Upsert user profile
     const meta = data.user.user_metadata;
     const twitchId = meta?.sub || meta?.provider_id;
-    const twitchUsername = meta?.preferred_username || meta?.user_name;
+    const twitchUsername = meta?.preferred_username || meta?.user_name || meta?.nickname || meta?.slug;
 
     if (twitchId && twitchUsername) {
-      const displayName = meta?.name || meta?.full_name || twitchUsername;
+      const displayName = meta?.nickname || meta?.name || meta?.full_name || twitchUsername;
       const avatar = meta?.picture || meta?.avatar_url || null;
 
       try {
