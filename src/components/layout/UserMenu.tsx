@@ -62,7 +62,7 @@ export function UserMenu() {
             supabase.auth.signInWithOAuth({
               provider: "twitch",
               options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
                 scopes: "user:read:email",
               },
             })
