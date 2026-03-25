@@ -23,9 +23,15 @@ export default function AuthCallbackPage() {
 
         if (data.user) {
           const meta = data.user.user_metadata;
-          const twitchId = meta?.sub || meta?.provider_id || "";
+          const twitchId = meta?.sub || meta?.provider_id;
           const twitchUsername =
-            meta?.preferred_username || meta?.user_name || "";
+            meta?.preferred_username || meta?.user_name;
+
+          if (!twitchId || !twitchUsername) {
+            router.replace("/login?error=missing_profile");
+            return;
+          }
+
           const displayName = meta?.name || meta?.full_name || twitchUsername;
           const avatar = meta?.picture || meta?.avatar_url || "";
 
