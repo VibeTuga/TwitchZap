@@ -6,11 +6,14 @@ import { createClient } from "@/lib/supabase/client";
 import { UserMenu } from "./UserMenu";
 import { ZapPoints } from "@/components/gamification/ZapPoints";
 import { useSoundEffects } from "@/lib/sounds";
+import { usePresence } from "@/hooks/usePresence";
 
 export function TopBar() {
   const [zapPoints, setZapPoints] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const supabase = useMemo(() => createClient(), []);
   const { soundEnabled, toggleSound } = useSoundEffects();
+  const { viewerCount } = usePresence(userId);
 
   useEffect(() => {
     async function fetchPoints() {
@@ -19,8 +22,11 @@ export function TopBar() {
       } = await supabase.auth.getUser();
       if (!user) {
         setZapPoints(null);
+        setUserId(null);
         return;
       }
+
+      setUserId(user.id);
 
       const { data } = await supabase
         .from("users")
@@ -46,7 +52,7 @@ export function TopBar() {
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 h-14 md:h-16 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">
-      {/* Mobile logo */}
+      {/* Mobile logo + viewer count */}
       <div className="flex items-center gap-2 lg:hidden">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-[0_0_16px_rgba(211,148,255,0.3)]">
           <span
@@ -59,7 +65,21 @@ export function TopBar() {
         <span className="font-headline font-bold text-lg text-primary tracking-tight">
           TwitchZap
         </span>
+        {viewerCount > 0 && (
+          <span className="flex items-center gap-1 text-xs text-on-surface-variant">
+            <span className="w-1.5 h-1.5 rounded-full bg-error animate-pulse" />
+            {viewerCount}
+          </span>
+        )}
       </div>
+
+      {/* Viewer count — desktop (hidden on mobile, shown alongside search) */}
+      {viewerCount > 0 && (
+        <div className="hidden lg:flex items-center gap-1.5 bg-surface-container rounded-full px-3 py-1.5 text-xs text-on-surface-variant">
+          <span className="w-2 h-2 rounded-full bg-error animate-pulse" />
+          <span>{viewerCount} online</span>
+        </div>
+      )}
 
       {/* Search — hidden on mobile */}
       <div className="hidden md:flex items-center bg-surface-container-high rounded-full px-4 py-2 w-96 max-w-[50%] focus-within:ring-1 focus-within:ring-primary-dim transition-all">
