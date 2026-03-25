@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -106,12 +109,40 @@ export function ScheduleTabs({
   queueEntries,
   recentBroadcasts,
   activeBroadcastId,
+  currentUserId,
+  currentUserPoints,
 }: {
   queueEntries: QueueEntry[];
   recentBroadcasts: BroadcastEntry[];
   activeBroadcastId: string | null;
+  currentUserId: string | null;
+  currentUserPoints: number;
 }) {
   const reduced = useReducedMotion();
+  const router = useRouter();
+  const [boostingId, setBoostingId] = useState<string | null>(null);
+
+  async function handleBoost(entryId: string) {
+    setBoostingId(entryId);
+    try {
+      const res = await fetch("/api/boosts/priority", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ queue_entry_id: entryId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "Failed to boost");
+        return;
+      }
+      toast.success(`Boosted to position #${data.new_position}!`);
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setBoostingId(null);
+    }
+  }
 
   return (
     <Tabs defaultValue="upcoming">
@@ -148,6 +179,13 @@ export function ScheduleTabs({
                   entry={entry}
                   isFirst={index === 0}
                   hasActiveBroadcast={!!activeBroadcastId}
+                  canBoost={
+                    entry.submittedBy?.id === currentUserId &&
+                    entry.position > 1 &&
+                    currentUserPoints >= 200
+                  }
+                  boosting={boostingId === entry.id}
+                  onBoost={() => handleBoost(entry.id)}
                 />
               </motion.div>
             ))}
@@ -176,10 +214,16 @@ function QueueCard({
   entry,
   isFirst,
   hasActiveBroadcast,
+  canBoost,
+  boosting,
+  onBoost,
 }: {
   entry: QueueEntry;
   isFirst: boolean;
   hasActiveBroadcast: boolean;
+  canBoost: boolean;
+  boosting: boolean;
+  onBoost: () => void;
 }) {
   const isNowPlaying = isFirst && hasActiveBroadcast;
 
@@ -246,6 +290,22 @@ function QueueCard({
             NOW PLAYING
           </span>
         </div>
+      )}
+
+      {/* Boost button */}
+      {canBoost && !isNowPlaying && (
+        <button
+          onClick={onBoost}
+          disabled={boosting}
+          className="bg-primary/20 text-primary text-xs font-bold rounded-lg px-2 py-1 hover:bg-primary/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 shrink-0"
+        >
+          {boosting ? (
+            <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+          ) : (
+            <span className="material-symbols-outlined text-sm">bolt</span>
+          )}
+          200 ZP
+        </button>
       )}
     </div>
   );
