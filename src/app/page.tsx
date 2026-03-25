@@ -8,6 +8,8 @@ import { useBroadcast } from "@/hooks/useBroadcast";
 import { useVoting } from "@/hooks/useVoting";
 import { useWatchTime } from "@/hooks/useWatchTime";
 import { Skeleton, SkeletonCard } from "@/components/ui/skeleton-card";
+import { UpNext } from "@/components/UpNext";
+import { ActivityFeed } from "@/components/ActivityFeed";
 
 const StreamPlayer = dynamic(
   () =>
@@ -286,12 +288,17 @@ export default function LiveViewPage() {
             </div>
           </div>
         </div>
+
+        {/* Up Next Section */}
+        <div className="px-4 md:px-0">
+          <UpNext />
+        </div>
       </div>
 
       {/* Right Sidebar */}
       <aside className="col-span-12 xl:col-span-3 xl:sticky xl:top-24 xl:h-[calc(100vh-120px)] flex flex-col gap-6">
         {/* Twitch Chat */}
-        <div className="twitch-chat-gradient rounded-[1.5rem] flex flex-col overflow-hidden shadow-2xl h-[300px] xl:h-auto xl:flex-1">
+        <div className="twitch-chat-gradient rounded-[1.5rem] flex flex-col overflow-hidden shadow-2xl h-[300px] xl:h-auto xl:flex-[3]">
           <div className="p-4 bg-[#1f1f23]/50 backdrop-blur-md flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#bf94ff]">
@@ -313,6 +320,11 @@ export default function LiveViewPage() {
               Chat unavailable
             </div>
           )}
+        </div>
+
+        {/* Activity Feed — hidden on mobile */}
+        <div className="hidden xl:block">
+          <ActivityFeed />
         </div>
       </aside>
     </div>
