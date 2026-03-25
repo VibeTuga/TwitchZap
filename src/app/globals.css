@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme inline {
+  --color-on-secondary: #005406;
+  --color-surface-bright: #2c2c30;
+  --color-primary-fixed: #cb80ff;
+  --color-secondary: #59ee50;
+  --color-inverse-surface: #fcf8fd;
+  --color-surface-variant: #25252a;
+  --color-error-dim: #d73357;
+  --color-on-primary: #4a0076;
+  --color-on-surface-variant: #acaaae;
+  --color-on-primary-fixed-variant: #470071;
+  --color-surface-container-high: #1f1f23;
+  --color-on-primary-container: #39005c;
+  --color-surface-container-highest: #25252a;
+  --color-on-surface: #f0edf1;
+  --color-inverse-on-surface: #555458;
+  --color-on-error: #490013;
+  --color-secondary-container: #006e0a;
+  --color-background: #0e0e11;
+  --color-primary-fixed-dim: #c26bff;
+  --color-on-tertiary-fixed-variant: #326f6f;
+  --color-on-secondary-fixed-variant: #005f07;
+  --color-tertiary-dim: #9ddad9;
+  --color-on-error-container: #ffb2b9;
+  --color-primary-container: #cb80ff;
+  --color-secondary-fixed-dim: #49e043;
+  --color-surface-tint: #d394ff;
+  --color-tertiary-fixed-dim: #b3f1f0;
+  --color-inverse-primary: #9100e0;
+  --color-primary: #d394ff;
+  --color-surface-dim: #0e0e11;
+  --color-surface-container: #19191d;
+  --color-tertiary-container: #b9f6f5;
+  --color-surface-container-low: #131316;
+  --color-on-secondary-container: #e6ffdb;
+  --color-on-tertiary: #2a6868;
+  --color-primary-dim: #aa30fa;
+  --color-on-tertiary-container: #206060;
+  --color-surface: #0e0e11;
+  --color-error-container: #a70138;
+  --color-on-background: #f0edf1;
+  --color-secondary-dim: #49e043;
+  --color-outline-variant: #48474b;
+  --color-outline: #767579;
+  --color-on-primary-fixed: #000000;
+  --color-error: #ff6e84;
+  --color-secondary-fixed: #59ee50;
+  --color-on-secondary-fixed: #003e03;
+  --color-tertiary-fixed: #c1fffe;
+  --color-tertiary: #e2fffe;
+  --color-surface-container-lowest: #000000;
+  --color-on-tertiary-fixed: #0b5252;
+
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  --radius-DEFAULT: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
+body {
+  background-color: #0e0e11;
+  color: #f0edf1;
+  font-family: "Inter", sans-serif;
+}
