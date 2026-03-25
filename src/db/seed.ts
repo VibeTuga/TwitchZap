@@ -1,5 +1,11 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
+
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL not set. Ensure .env.local exists with DATABASE_URL.");
+  process.exit(1);
+}
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { badges } from "./schema";
