@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { db } from "@/db";
@@ -12,6 +13,10 @@ import {
 } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { ProfileContent } from "./ProfileContent";
+
+export const metadata: Metadata = {
+  title: "My Profile",
+};
 
 export default async function ProfilePage() {
   const user = await getUser();

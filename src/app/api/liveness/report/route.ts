@@ -4,8 +4,10 @@ import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isValidUUID, isValidLivenessStatus } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -27,7 +29,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (status !== "offline" && status !== "online") {
+  if (!isValidUUID(broadcast_id)) {
+    return NextResponse.json(
+      { error: "Invalid broadcast_id format" },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidLivenessStatus(status)) {
     return NextResponse.json(
       { error: "status must be 'offline' or 'online'" },
       { status: 400 }
@@ -160,4 +169,10 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ success: true, recovered: false });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

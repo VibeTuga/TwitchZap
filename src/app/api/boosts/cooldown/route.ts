@@ -5,12 +5,14 @@ import { isInCooldown, calculateCooldown } from "@/lib/cooldown";
 import { db } from "@/db";
 import { cooldownBoosts, streams } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { isValidUUID } from "@/lib/validation";
 
 const COOLDOWN_BOOST_COST = 100;
 const COOLDOWN_BOOST_HOURS = 2;
 const MIN_COOLDOWN_HOURS = 4;
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,9 +26,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { stream_id } = body;
-  if (!stream_id) {
+  if (!stream_id || !isValidUUID(stream_id)) {
     return NextResponse.json(
-      { error: "stream_id is required" },
+      { error: "Valid stream_id is required" },
       { status: 400 }
     );
   }
@@ -95,4 +97,10 @@ export async function POST(request: NextRequest) {
     points_spent: COOLDOWN_BOOST_COST,
     new_cooldown_hours: newCooldownHours,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

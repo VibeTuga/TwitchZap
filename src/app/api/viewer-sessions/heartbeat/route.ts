@@ -4,10 +4,12 @@ import { db } from "@/db";
 import { viewerSessions, broadcasts, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { awardPoints } from "@/lib/points";
+import { isValidUUID } from "@/lib/validation";
 
 const HEARTBEAT_SECONDS = 60;
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,9 +23,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { broadcast_id } = body;
-  if (!broadcast_id) {
+  if (!broadcast_id || !isValidUUID(broadcast_id)) {
     return NextResponse.json(
-      { error: "broadcast_id is required" },
+      { error: "Valid broadcast_id is required" },
       { status: 400 }
     );
   }
@@ -115,4 +117,10 @@ export async function POST(request: NextRequest) {
     watch_seconds: HEARTBEAT_SECONDS,
     points_awarded: 0,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

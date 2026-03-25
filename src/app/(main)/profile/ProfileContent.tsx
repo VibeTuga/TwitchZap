@@ -203,21 +203,21 @@ export function ProfileContent({
   return (
     <div className="space-y-8">
       {/* Profile Header */}
-      <div className="flex items-center gap-5">
-        <Avatar className="w-20 h-20 rounded-full border-2 border-primary-dim shrink-0">
+      <div className="flex items-center gap-4 sm:gap-5">
+        <Avatar className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-primary-dim shrink-0">
           <AvatarImage src={user.twitchAvatarUrl ?? undefined} alt={displayName} />
-          <AvatarFallback className="bg-surface-variant text-on-surface-variant rounded-full text-2xl font-bold">
+          <AvatarFallback className="bg-surface-variant text-on-surface-variant rounded-full text-xl sm:text-2xl font-bold">
             {displayName.charAt(0)}
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-headline font-black text-on-surface truncate">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-headline font-black text-on-surface truncate">
               {displayName}
             </h1>
             {getRoleBadge(user.role)}
           </div>
-          <div className="flex items-center gap-3 mt-1 text-sm text-on-surface-variant flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs sm:text-sm text-on-surface-variant flex-wrap">
             <span className="flex items-center gap-1">
               <span className="material-symbols-outlined text-base">star</span>
               {level}

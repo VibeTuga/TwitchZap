@@ -3,14 +3,23 @@ import { getStreamInfo, getUserInfo } from "@/lib/twitch/api";
 import { db } from "@/db";
 import { streams, queue } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { isValidTwitchUsername } from "@/lib/validation";
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get("username")?.trim().toLowerCase();
 
   if (!username) {
     return NextResponse.json(
       { error: "username is required" },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidTwitchUsername(username)) {
+    return NextResponse.json(
+      { error: "Invalid username format" },
       { status: 400 }
     );
   }
@@ -96,4 +105,10 @@ export async function GET(request: NextRequest) {
     cooldown_remaining: cooldownRemaining,
     queue_position: queuePosition,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

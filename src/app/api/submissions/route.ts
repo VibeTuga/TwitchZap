@@ -6,8 +6,10 @@ import { db } from "@/db";
 import { streams, queue, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { checkAndAwardBadges } from "@/lib/badges";
+import { isValidTwitchUsername } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,6 +26,13 @@ export async function POST(request: NextRequest) {
   if (!twitchUsername) {
     return NextResponse.json(
       { error: "twitch_username is required" },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidTwitchUsername(twitchUsername)) {
+    return NextResponse.json(
+      { error: "Invalid Twitch username format" },
       { status: 400 }
     );
   }
@@ -152,4 +161,10 @@ export async function POST(request: NextRequest) {
     },
     new_badges: newBadges,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

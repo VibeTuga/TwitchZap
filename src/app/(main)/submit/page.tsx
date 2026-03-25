@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton-card";
 
 interface ChannelInfo {
   id: string;
@@ -104,6 +106,9 @@ export default function SubmitPage() {
         setSubmitResult(data);
         setCheckResult(null);
         setUsername("");
+        toast.success("Stream submitted!", {
+          description: `${data.stream.twitch_display_name} is at position #${data.queue_position} in queue`,
+        });
       }
     } catch {
       setError("Failed to submit stream. Please try again.");
@@ -132,11 +137,11 @@ export default function SubmitPage() {
       </div>
 
       {/* Search Input */}
-      <div className="bg-surface-container rounded-2xl p-6 space-y-4">
+      <div className="bg-surface-container rounded-2xl p-4 sm:p-6 space-y-4">
         <label className="text-sm font-label font-medium text-on-surface-variant">
           Twitch Username
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <input
               type="text"
@@ -150,7 +155,7 @@ export default function SubmitPage() {
           <button
             onClick={handleCheck}
             disabled={!username.trim() || checking}
-            className="h-12 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(170,48,250,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-12 w-full sm:w-auto px-6 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(170,48,250,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {checking ? (
               <span className="material-symbols-outlined animate-spin text-lg">
@@ -191,8 +196,23 @@ export default function SubmitPage() {
         </div>
       )}
 
+      {/* Checking skeleton */}
+      {checking && (
+        <div className="bg-surface-container-high rounded-2xl p-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-14 w-14 rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-3 w-1/3" />
+            </div>
+            <Skeleton className="h-5 w-20" />
+          </div>
+          <Skeleton className="h-10 w-full rounded-lg" />
+        </div>
+      )}
+
       {/* Preview Card */}
-      {checkResult && (
+      {checkResult && !checking && (
         <div className="bg-surface-container-high rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-14 w-14 rounded-xl">

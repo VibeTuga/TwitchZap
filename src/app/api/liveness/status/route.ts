@@ -4,6 +4,7 @@ import { broadcasts } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
 export async function GET() {
+  try {
   const [broadcast] = await db
     .select({
       id: broadcasts.id,
@@ -47,4 +48,10 @@ export async function GET() {
       ? broadcast.offlineReporters.length
       : 0,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

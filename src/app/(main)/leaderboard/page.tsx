@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { getUser } from "@/lib/auth";
 import { db } from "@/db";
 import { badges, userBadges } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { LeaderboardContent } from "./LeaderboardContent";
+
+export const metadata: Metadata = {
+  title: "Community Leaderboard",
+};
 
 export default async function LeaderboardPage() {
   const user = await getUser();

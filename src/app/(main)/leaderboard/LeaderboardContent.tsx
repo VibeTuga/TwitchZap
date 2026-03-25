@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BadgeDisplay } from "@/components/gamification/BadgeDisplay";
+import { SkeletonRow } from "@/components/ui/skeleton-card";
 
 type LeaderboardType = "points" | "submissions" | "votes";
 type Period = "week" | "month" | "all";
@@ -136,45 +137,47 @@ export function LeaderboardContent({
     <div className="space-y-8">
       {/* Your Rank Card */}
       {userRank && (
-        <div className="bg-gradient-to-br from-primary-dim/20 to-primary-dim/5 rounded-[1.5rem] p-6">
+        <div className="bg-gradient-to-br from-primary-dim/20 to-primary-dim/5 rounded-[1.5rem] p-4 sm:p-6">
           <p className="text-xs font-headline font-bold text-on-surface-variant uppercase tracking-wider mb-3">
             Your Rank
           </p>
-          <div className="flex items-center gap-6 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
             <div className="flex items-center gap-2">
               <span className="text-3xl font-headline font-black text-on-surface">
                 #{userRank.rank}
               </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-primary-dim text-lg">
-                bolt
-              </span>
-              <span className="text-lg font-headline font-bold text-on-surface">
-                {userRank.value.toLocaleString()}
-              </span>
-              <span className="text-sm text-on-surface-variant">
-                {getValueLabel(type)}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-secondary text-lg">
-                military_tech
-              </span>
-              <span className="text-sm font-bold text-on-surface">
-                {earnedBadges.length} badges
-              </span>
-            </div>
-            {userStats && (
+            <div className="flex items-center gap-4 flex-wrap">
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-tertiary text-lg">
-                  star
+                <span className="material-symbols-outlined text-primary-dim text-lg">
+                  bolt
                 </span>
-                <span className="text-sm font-bold text-on-surface">
-                  {getLevelTitle(userStats.totalPointsEarned)}
+                <span className="text-lg font-headline font-bold text-on-surface">
+                  {userRank.value.toLocaleString()}
+                </span>
+                <span className="text-sm text-on-surface-variant">
+                  {getValueLabel(type)}
                 </span>
               </div>
-            )}
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-secondary text-lg">
+                  military_tech
+                </span>
+                <span className="text-sm font-bold text-on-surface">
+                  {earnedBadges.length} badges
+                </span>
+              </div>
+              {userStats && (
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-tertiary text-lg">
+                    star
+                  </span>
+                  <span className="text-sm font-bold text-on-surface">
+                    {getLevelTitle(userStats.totalPointsEarned)}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -203,12 +206,12 @@ export function LeaderboardContent({
         </Tabs>
 
         {/* Time Period Pills */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
           {(Object.keys(periodLabels) as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`px-4 py-1.5 rounded-full text-xs font-headline font-bold transition-colors ${
+              className={`px-4 py-1.5 rounded-full text-xs font-headline font-bold transition-colors whitespace-nowrap min-h-[44px] flex items-center ${
                 period === p
                   ? "bg-primary-dim/20 text-primary ring-1 ring-primary-dim/30"
                   : "bg-surface-container-high text-on-surface-variant hover:text-on-surface"
@@ -223,13 +226,10 @@ export function LeaderboardContent({
       {/* Rankings Table */}
       <div className="space-y-1">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <span className="material-symbols-outlined text-on-surface-variant text-2xl animate-spin">
-              progress_activity
-            </span>
-            <p className="text-sm text-on-surface-variant mt-2">
-              Loading rankings...
-            </p>
+          <div className="space-y-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         ) : !data?.rankings.length ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -253,14 +253,14 @@ export function LeaderboardContent({
             return (
               <div
                 key={entry.user.id}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${
+                className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-colors ${
                   isTopThree
                     ? "bg-surface-container-high"
                     : "bg-surface-container"
                 }`}
               >
                 {/* Rank */}
-                <div className="w-10 text-center shrink-0">
+                <div className="w-8 sm:w-10 text-center shrink-0">
                   {medal ? (
                     <span className="text-xl">{medal}</span>
                   ) : (
@@ -271,7 +271,7 @@ export function LeaderboardContent({
                 </div>
 
                 {/* Avatar */}
-                <Avatar className="h-9 w-9 rounded-full shrink-0">
+                <Avatar className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shrink-0">
                   <AvatarImage
                     src={entry.user.twitch_avatar_url ?? undefined}
                     alt={
@@ -289,7 +289,7 @@ export function LeaderboardContent({
 
                 {/* Name */}
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm font-headline font-bold truncate text-on-surface">
+                  <span className="text-sm font-headline font-bold truncate block text-on-surface">
                     {entry.user.twitch_display_name ??
                       entry.user.twitch_username}
                   </span>

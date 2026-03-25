@@ -21,6 +21,7 @@ function getPeriodStart(period: Period): Date | null {
 }
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const type = (searchParams.get("type") ?? "points") as LeaderboardType;
   const period = (searchParams.get("period") ?? "all") as Period;
@@ -250,4 +251,10 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ rankings, user_rank: userRank });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

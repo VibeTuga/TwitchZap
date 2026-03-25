@@ -7,8 +7,10 @@ import { eq, sql } from "drizzle-orm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { awardPoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
+import { isValidUUID, isValidVote } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +32,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (vote !== "skip" && vote !== "stay") {
+  if (!isValidUUID(broadcast_id)) {
+    return NextResponse.json(
+      { error: "Invalid broadcast_id format" },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidVote(vote)) {
     return NextResponse.json(
       { error: "vote must be 'skip' or 'stay'" },
       { status: 400 }
@@ -149,4 +158,10 @@ export async function POST(request: NextRequest) {
     points_earned: 5,
     new_badges: newBadges,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { getQueue, getRecentBroadcasts } from "@/lib/queue";
 import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ScheduleTabs } from "./ScheduleTabs";
+
+export const metadata: Metadata = {
+  title: "Broadcast Schedule",
+};
 
 export default async function SchedulePage() {
   const queueEntries = await getQueue("waiting");

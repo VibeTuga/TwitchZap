@@ -5,6 +5,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { getUser } from "@/lib/auth";
 
 export async function GET() {
+  try {
   // Get current live broadcast
   const [broadcast] = await db
     .select({
@@ -87,4 +88,10 @@ export async function GET() {
       has_voted: hasVoted,
     },
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

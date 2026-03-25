@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface QueueEntry {
   id: string;
@@ -108,6 +111,8 @@ export function ScheduleTabs({
   recentBroadcasts: BroadcastEntry[];
   activeBroadcastId: string | null;
 }) {
+  const reduced = useReducedMotion();
+
   return (
     <Tabs defaultValue="upcoming">
       <TabsList className="bg-surface-container-high rounded-xl p-1 w-full">
@@ -127,20 +132,26 @@ export function ScheduleTabs({
 
       <TabsContent value="upcoming" className="mt-4 space-y-3">
         {queueEntries.length === 0 ? (
-          <EmptyState
-            icon="queue"
-            title="Queue is empty"
-            description="No streams in the queue. Be the first to submit one!"
-          />
+          <EmptyQueueState />
         ) : (
-          queueEntries.map((entry, index) => (
-            <QueueCard
-              key={entry.id}
-              entry={entry}
-              isFirst={index === 0}
-              hasActiveBroadcast={!!activeBroadcastId}
-            />
-          ))
+          <AnimatePresence mode="popLayout">
+            {queueEntries.map((entry, index) => (
+              <motion.div
+                key={entry.id}
+                layoutId={reduced ? undefined : entry.id}
+                initial={reduced ? undefined : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduced ? undefined : { opacity: 0, y: -10 }}
+                transition={reduced ? undefined : { type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <QueueCard
+                  entry={entry}
+                  isFirst={index === 0}
+                  hasActiveBroadcast={!!activeBroadcastId}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         )}
       </TabsContent>
 
@@ -174,27 +185,27 @@ function QueueCard({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${
+      className={`flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-colors ${
         isNowPlaying
           ? "bg-primary-dim/10 ring-1 ring-primary-dim/30"
           : "bg-surface-container-high hover:bg-surface-bright"
       }`}
     >
       {/* Position */}
-      <div className="w-8 text-center shrink-0">
+      <div className="w-6 sm:w-8 text-center shrink-0">
         {isNowPlaying ? (
-          <span className="text-xs font-bold text-primary uppercase tracking-widest">
+          <span className="text-[10px] sm:text-xs font-bold text-primary uppercase tracking-widest">
             LIVE
           </span>
         ) : (
-          <span className="text-lg font-headline font-bold text-on-surface-variant">
+          <span className="text-base sm:text-lg font-headline font-bold text-on-surface-variant">
             #{entry.position}
           </span>
         )}
       </div>
 
       {/* Avatar */}
-      <Avatar className="h-10 w-10 rounded-lg shrink-0">
+      <Avatar className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg shrink-0">
         <AvatarImage
           src={entry.stream?.twitchAvatarUrl ?? undefined}
           alt={entry.stream?.twitchDisplayName ?? ""}
@@ -231,7 +242,7 @@ function QueueCard({
       {isNowPlaying && (
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="w-2 h-2 rounded-full bg-error animate-pulse" />
-          <span className="text-xs font-bold text-primary uppercase">
+          <span className="text-xs font-bold text-primary uppercase hidden sm:inline">
             NOW PLAYING
           </span>
         </div>
@@ -281,6 +292,34 @@ function BroadcastCard({ broadcast }: { broadcast: BroadcastEntry }) {
       <div className="shrink-0">
         <VoteResultBadge result={broadcast.votingResult} />
       </div>
+    </div>
+  );
+}
+
+function EmptyQueueState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-14 h-14 rounded-2xl bg-primary-dim/20 flex items-center justify-center mb-4">
+        <span
+          className="material-symbols-outlined text-primary-dim text-2xl"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          queue
+        </span>
+      </div>
+      <h3 className="text-base font-headline font-bold text-on-surface">
+        No streams in queue yet
+      </h3>
+      <p className="text-sm text-on-surface-variant mt-1 mb-4">
+        Be the first to submit!
+      </p>
+      <Link
+        href="/submit"
+        className="inline-flex h-10 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-dim text-on-primary-fixed font-headline font-bold text-sm transition-all hover:shadow-[0_0_20px_rgba(170,48,250,0.4)] items-center justify-center gap-2"
+      >
+        <span className="material-symbols-outlined text-base">publish</span>
+        Submit a Stream
+      </Link>
     </div>
   );
 }

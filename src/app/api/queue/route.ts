@@ -2,10 +2,17 @@ import { NextResponse } from "next/server";
 import { getQueue } from "@/lib/queue";
 
 export async function GET() {
-  const queueEntries = await getQueue("waiting");
+  try {
+    const queueEntries = await getQueue("waiting");
 
-  return NextResponse.json({
-    queue: queueEntries,
-    total: queueEntries.length,
-  });
+    return NextResponse.json({
+      queue: queueEntries,
+      total: queueEntries.length,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

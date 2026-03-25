@@ -4,11 +4,13 @@ import { spendPoints } from "@/lib/points";
 import { db } from "@/db";
 import { queue } from "@/db/schema";
 import { eq, and, sql, lt, gte } from "drizzle-orm";
+import { isValidUUID } from "@/lib/validation";
 
 const PRIORITY_BOOST_COST = 200;
 const POSITIONS_TO_MOVE = 3;
 
 export async function POST(request: NextRequest) {
+  try {
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,9 +24,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { queue_entry_id } = body;
-  if (!queue_entry_id) {
+  if (!queue_entry_id || !isValidUUID(queue_entry_id)) {
     return NextResponse.json(
-      { error: "queue_entry_id is required" },
+      { error: "Valid queue_entry_id is required" },
       { status: 400 }
     );
   }
@@ -115,4 +117,10 @@ export async function POST(request: NextRequest) {
     old_position: entry.position,
     new_position: newPosition,
   });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

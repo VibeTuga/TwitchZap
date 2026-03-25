@@ -10,9 +10,15 @@ import { awardPoints, awardWatchTimePoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function GET(request: NextRequest) {
+  try {
   // Verify CRON_SECRET
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (
+    !cronSecret ||
+    !authHeader ||
+    authHeader !== `Bearer ${cronSecret}`
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -324,6 +330,12 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json({ action: "checked", broadcast_id: current.id });
+  } catch {
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 async function getNextLiveStream(): Promise<{
