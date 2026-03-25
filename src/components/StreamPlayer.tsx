@@ -94,7 +94,7 @@ export function StreamPlayer({
         width: "100%",
         height: "100%",
         autoplay: true,
-        muted: true,
+        muted: false,
       });
 
       playerRef.current = player;
