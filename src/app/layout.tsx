@@ -46,11 +46,13 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-background text-on-surface font-body">
         <Sidebar />
-        <TopBar />
-        <main className="lg:ml-64 px-4 md:px-8 pt-4 md:pt-8 pb-24 lg:pb-8 min-h-screen">
-          <div className="max-w-[1600px] mx-auto">{children}</div>
-        </main>
-        <MobileNav />
+        <div className="lg:ml-64 min-h-screen flex flex-col">
+          <TopBar />
+          <main className="px-4 md:px-8 pt-4 md:pt-8 pb-24 lg:pb-8 flex-1">
+            <div className="max-w-[1600px] mx-auto">{children}</div>
+          </main>
+          <MobileNav />
+        </div>
         <Toaster />
       </body>
     </html>

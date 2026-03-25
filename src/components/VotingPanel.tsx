@@ -110,15 +110,15 @@ export function VotingPanel({
     counts.total > 0 ? Math.round((counts.stay / counts.total) * 100) : 0;
 
   const containerVariants = reduced
-    ? {}
-    : {
+    ? undefined
+    : ({
         hidden: { height: 0, opacity: 0 },
         visible: {
           height: "auto",
           opacity: 1,
-          transition: { type: "spring", stiffness: 300, damping: 30 },
+          transition: { type: "spring" as const, stiffness: 300, damping: 30 },
         },
-      };
+      } satisfies import("framer-motion").Variants);
 
   return (
     <div className="bg-surface-container rounded-2xl overflow-hidden relative">
