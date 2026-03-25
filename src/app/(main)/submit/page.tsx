@@ -1,18 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton-card";
 import { parseTwitchInput } from "@/lib/validation";
-
-interface AuthUser {
-  id: string;
-  twitchUsername: string;
-  twitchDisplayName: string;
-  role: string;
-}
+import { useAuth } from "@/components/AuthProvider";
 
 interface ChannelInfo {
   id: string;
@@ -59,8 +53,7 @@ interface SubmissionResult {
 }
 
 export default function SubmitPage() {
-  // null = loading, false = not logged in, AuthUser = logged in
-  const [user, setUser] = useState<AuthUser | false | null>(null);
+  const { user, ready, isLoggedIn } = useAuth();
   const [username, setUsername] = useState("");
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -70,13 +63,6 @@ export default function SubmitPage() {
     null
   );
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data: AuthUser) => setUser(data))
-      .catch(() => setUser(false));
-  }, []);
 
   const handleCheck = useCallback(async () => {
     const trimmed = username.trim();
@@ -203,9 +189,7 @@ export default function SubmitPage() {
     }
   };
 
-  const isLoggedIn = user !== null && user !== false;
-
-  if (user === null) {
+  if (!ready) {
     return (
       <div className="space-y-8 max-w-2xl mx-auto">
         <div>
