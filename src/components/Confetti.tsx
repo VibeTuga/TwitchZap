@@ -17,10 +17,7 @@ export function Confetti({ active }: { active: boolean }) {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    if (!active) {
-      setParticles([]);
-      return;
-    }
+    if (!active) return;
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) return;
@@ -33,10 +30,14 @@ export function Confetti({ active }: { active: boolean }) {
       color: COLORS[Math.floor(Math.random() * COLORS.length)],
       size: 4 + Math.random() * 6,
     }));
-    setParticles(newParticles);
+    const raf = requestAnimationFrame(() => setParticles(newParticles));
 
     const timer = setTimeout(() => setParticles([]), 3000);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      setParticles([]);
+    };
   }, [active]);
 
   if (particles.length === 0) return null;
@@ -65,13 +66,14 @@ export function ExtensionText({ active }: { active: boolean }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    if (!active) {
-      setShow(false);
-      return;
-    }
-    setShow(true);
+    if (!active) return;
+    const raf = requestAnimationFrame(() => setShow(true));
     const timer = setTimeout(() => setShow(false), 1500);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+      setShow(false);
+    };
   }, [active]);
 
   if (!show) return null;

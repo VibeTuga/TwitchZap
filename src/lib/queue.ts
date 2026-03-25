@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { queue, streams, users, broadcasts } from "@/db/schema";
-import { eq, sql, and, desc, asc } from "drizzle-orm";
+import { eq, sql, desc, asc } from "drizzle-orm";
 
 export async function addToQueue(streamId: string, userId: string) {
   const [maxPos] = await db

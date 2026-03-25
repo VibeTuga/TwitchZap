@@ -15,16 +15,18 @@ export function StreamPlayer({ channel, isReconnecting }: StreamPlayerProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const reduced = useReducedMotion();
 
+  if (channel !== currentChannel && !isTransitioning) {
+    setIsTransitioning(true);
+  }
+
   useEffect(() => {
-    if (channel !== currentChannel) {
-      setIsTransitioning(true);
-      const timer = setTimeout(() => {
-        setCurrentChannel(channel);
-        setIsTransitioning(false);
-      }, reduced ? 0 : 300);
-      return () => clearTimeout(timer);
-    }
-  }, [channel, currentChannel, reduced]);
+    if (!isTransitioning) return;
+    const timer = setTimeout(() => {
+      setCurrentChannel(channel);
+      setIsTransitioning(false);
+    }, reduced ? 0 : 300);
+    return () => clearTimeout(timer);
+  }, [isTransitioning, channel, reduced]);
 
   const fadeVariants = reduced
     ? { enter: { opacity: 1 }, exit: { opacity: 0 } }

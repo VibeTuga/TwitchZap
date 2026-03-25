@@ -20,10 +20,11 @@ export default async function SchedulePage() {
     .where(eq(broadcasts.status, "live"))
     .limit(1);
 
+  const now = new Date();
   const timeUntilNext = activeBroadcast
     ? Math.max(
         0,
-        new Date(activeBroadcast.scheduledEndAt).getTime() - Date.now()
+        new Date(activeBroadcast.scheduledEndAt).getTime() - now.getTime()
       )
     : null;
 
