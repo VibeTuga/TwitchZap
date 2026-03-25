@@ -6,6 +6,9 @@ import { db } from "@/db";
 import { cooldownBoosts, streams } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { isValidUUID } from "@/lib/validation";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 10 });
 
 const COOLDOWN_BOOST_COST = 100;
 const COOLDOWN_BOOST_HOURS = 2;
@@ -13,6 +16,11 @@ const MIN_COOLDOWN_HOURS = 4;
 
 export async function POST(request: NextRequest) {
   try {
+  const ip = getClientIp(request);
+  try { limiter.check(ip); } catch {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
