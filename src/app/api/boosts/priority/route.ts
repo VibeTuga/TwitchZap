@@ -5,12 +5,20 @@ import { db } from "@/db";
 import { queue } from "@/db/schema";
 import { eq, and, sql, lt, gte } from "drizzle-orm";
 import { isValidUUID } from "@/lib/validation";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 10 });
 
 const PRIORITY_BOOST_COST = 200;
 const POSITIONS_TO_MOVE = 3;
 
 export async function POST(request: NextRequest) {
   try {
+  const ip = getClientIp(request);
+  try { limiter.check(ip); } catch {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

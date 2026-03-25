@@ -7,9 +7,17 @@ import { streams, queue, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { isValidTwitchUsername } from "@/lib/validation";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 5 });
 
 export async function POST(request: NextRequest) {
   try {
+  const ip = getClientIp(request);
+  try { limiter.check(ip); } catch {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

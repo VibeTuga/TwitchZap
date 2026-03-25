@@ -8,9 +8,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { awardPoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { isValidUUID, isValidVote } from "@/lib/validation";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 10 });
 
 export async function POST(request: NextRequest) {
   try {
+  const ip = getClientIp(request);
+  try { limiter.check(ip); } catch {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
