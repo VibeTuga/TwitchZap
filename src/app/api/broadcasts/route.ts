@@ -82,12 +82,19 @@ export async function GET() {
     hasVoted = !!existingVote;
   }
 
-  return NextResponse.json({
-    broadcast: {
-      ...broadcast,
-      has_voted: hasVoted,
+  return NextResponse.json(
+    {
+      broadcast: {
+        ...broadcast,
+        has_voted: hasVoted,
+      },
     },
-  });
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=3, stale-while-revalidate=5",
+      },
+    }
+  );
   } catch {
     return NextResponse.json(
       { error: "Internal server error" },
