@@ -5,12 +5,16 @@ import { viewerSessions, broadcasts, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { awardPoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
-import { isValidUUID } from "@/lib/validation";
+import { isValidUUID, validateOrigin } from "@/lib/validation";
 
 const HEARTBEAT_SECONDS = 60;
 
 export async function POST(request: NextRequest) {
   try {
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const user = await getUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
