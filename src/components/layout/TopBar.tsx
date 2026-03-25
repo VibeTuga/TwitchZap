@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { UserMenu } from "./UserMenu";
 import { ZapPoints } from "@/components/gamification/ZapPoints";
+import { useSoundEffects } from "@/lib/sounds";
 
 export function TopBar() {
   const [zapPoints, setZapPoints] = useState<number | null>(null);
   const supabase = useMemo(() => createClient(), []);
+  const { soundEnabled, toggleSound } = useSoundEffects();
 
   useEffect(() => {
     async function fetchPoints() {
@@ -82,6 +85,14 @@ export function TopBar() {
           </div>
         )}
 
+        <button
+          onClick={toggleSound}
+          className="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+          aria-label={soundEnabled ? "Mute sound effects" : "Enable sound effects"}
+          title={soundEnabled ? "Mute sound effects" : "Enable sound effects"}
+        >
+          {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+        </button>
         <UserMenu />
       </div>
     </header>
