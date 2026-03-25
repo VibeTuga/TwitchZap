@@ -39,10 +39,7 @@ function useElapsedTime(startedAt: string | null) {
   const [elapsed, setElapsed] = useState("");
 
   useEffect(() => {
-    if (!startedAt) {
-      setElapsed("");
-      return;
-    }
+    if (!startedAt) return;
 
     const update = () => {
       const ms = Date.now() - new Date(startedAt).getTime();
@@ -61,7 +58,7 @@ function useElapsedTime(startedAt: string | null) {
     return () => clearInterval(interval);
   }, [startedAt]);
 
-  return elapsed;
+  return startedAt ? elapsed : "";
 }
 
 export default function LiveViewPage() {
@@ -70,14 +67,10 @@ export default function LiveViewPage() {
     broadcast?.id ?? null
   );
   const [showConfetti, setShowConfetti] = useState(false);
-  const [hostname, setHostname] = useState("localhost");
+  const [hostname] = useState(() => typeof window !== 'undefined' ? window.location.hostname : 'localhost');
   const timeAired = useElapsedTime(broadcast?.startedAt ?? null);
 
   useWatchTime(broadcast?.id ?? null);
-
-  useEffect(() => {
-    setHostname(window.location.hostname);
-  }, []);
 
   // Sync hasVoted from broadcast state
   if (broadcast?.has_voted && !hasVoted) {
@@ -179,6 +172,7 @@ export default function LiveViewPage() {
         <ErrorBoundary fallbackMessage="Stream player unavailable">
           <StreamPlayer
             channel={channelUsername ?? null}
+            broadcastId={broadcast?.id ?? null}
             isReconnecting={isReconnecting}
             gracePeriodExpiresAt={broadcast?.gracePeriodExpiresAt}
           />

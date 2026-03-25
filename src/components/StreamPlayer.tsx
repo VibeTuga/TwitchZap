@@ -6,11 +6,24 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface StreamPlayerProps {
   channel: string | null;
+  broadcastId: string | null;
   isReconnecting?: boolean;
   gracePeriodExpiresAt?: string | null;
 }
 
-export function StreamPlayer({ channel, isReconnecting, gracePeriodExpiresAt }: StreamPlayerProps) {
+export function StreamPlayer({
+  channel,
+  broadcastId,
+  isReconnecting,
+  gracePeriodExpiresAt,
+}: StreamPlayerProps) {
+  const playerRef = useRef<TwitchPlayerInstance | null>(null);
+  const broadcastIdRef = useRef(broadcastId);
+
+  useEffect(() => {
+    broadcastIdRef.current = broadcastId;
+  }, [broadcastId]);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentChannel, setCurrentChannel] = useState(channel);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -20,32 +33,32 @@ export function StreamPlayer({ channel, isReconnecting, gracePeriodExpiresAt }: 
 
   // Countdown timer based on grace period expiration
   useEffect(() => {
-    if (!isReconnecting || !gracePeriodExpiresAt) {
-      setCountdownDone(false);
-      return;
-    }
+    if (!isReconnecting || !gracePeriodExpiresAt) return;
 
-    const calcRemaining = () => {
-      const remaining = Math.max(
-        0,
-        Math.ceil((new Date(gracePeriodExpiresAt).getTime() - Date.now()) / 1000)
-      );
-      return remaining;
-    };
+    const calcRemaining = () => Math.max(
+      0,
+      Math.ceil((new Date(gracePeriodExpiresAt).getTime() - Date.now()) / 1000)
+    );
 
-    setSecondsRemaining(calcRemaining());
-    setCountdownDone(false);
-
-    const interval = setInterval(() => {
+    const tick = () => {
       const remaining = calcRemaining();
       setSecondsRemaining(remaining);
       if (remaining <= 0) {
         setCountdownDone(true);
-        clearInterval(interval);
+        clearInterval(intervalId);
+      } else {
+        setCountdownDone(false);
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(interval);
+    // Defer first tick to avoid synchronous setState in effect body
+    const initialTimer = setTimeout(tick, 0);
+    const intervalId = setInterval(tick, 1000);
+
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(intervalId);
+    };
   }, [isReconnecting, gracePeriodExpiresAt]);
 
   if (channel !== currentChannel && !isTransitioning) {
@@ -60,6 +73,79 @@ export function StreamPlayer({ channel, isReconnecting, gracePeriodExpiresAt }: 
     }, reduced ? 0 : 300);
     return () => clearTimeout(timer);
   }, [isTransitioning, channel, reduced]);
+
+  // Twitch Interactive Player instantiation
+  useEffect(() => {
+    if (!currentChannel || isTransitioning) return;
+
+    const containerId = `twitch-player-${currentChannel}`;
+    let destroyed = false;
+
+    const initPlayer = (): boolean => {
+      if (destroyed) return true;
+      if (!window.Twitch?.Player) return false;
+
+      const container = document.getElementById(containerId);
+      if (!container) return false;
+
+      const player = new window.Twitch.Player(containerId, {
+        channel: currentChannel,
+        parent: [window.location.hostname],
+        width: "100%",
+        height: "100%",
+        muted: true,
+      });
+
+      playerRef.current = player;
+
+      const reportLiveness = (status: "offline" | "online") => {
+        const bid = broadcastIdRef.current;
+        if (!bid) return;
+        fetch("/api/liveness/report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ broadcast_id: bid, status }),
+        }).catch(() => {
+          // Silently fail — server-side polling is the fallback
+        });
+      };
+
+      player.addEventListener(window.Twitch.Player.OFFLINE, () =>
+        reportLiveness("offline")
+      );
+      player.addEventListener(window.Twitch.Player.ONLINE, () =>
+        reportLiveness("online")
+      );
+
+      return true;
+    };
+
+    if (!initPlayer()) {
+      const interval = setInterval(() => {
+        if (initPlayer()) clearInterval(interval);
+      }, 200);
+
+      const timeout = setTimeout(() => clearInterval(interval), 10_000);
+
+      return () => {
+        destroyed = true;
+        clearInterval(interval);
+        clearTimeout(timeout);
+        if (playerRef.current) {
+          playerRef.current.destroy();
+          playerRef.current = null;
+        }
+      };
+    }
+
+    return () => {
+      destroyed = true;
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
+    };
+  }, [currentChannel, isTransitioning]);
 
   const fadeVariants = reduced
     ? { enter: { opacity: 1 }, exit: { opacity: 0 } }
@@ -106,10 +192,9 @@ export function StreamPlayer({ channel, isReconnecting, gracePeriodExpiresAt }: 
             exit="exit"
             className="absolute inset-0"
           >
-            <iframe
-              src={`https://player.twitch.tv/?channel=${currentChannel}&parent=${typeof window !== "undefined" ? window.location.hostname : "localhost"}&muted=true`}
+            <div
+              id={`twitch-player-${currentChannel}`}
               className="w-full h-full"
-              allowFullScreen
             />
           </motion.div>
         ) : (
