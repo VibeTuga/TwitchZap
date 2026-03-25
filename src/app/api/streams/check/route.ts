@@ -3,23 +3,24 @@ import { getStreamInfo, getUserInfo } from "@/lib/twitch/api";
 import { db } from "@/db";
 import { streams, queue } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { isValidTwitchUsername } from "@/lib/validation";
+import { parseTwitchInput } from "@/lib/validation";
 
 export async function GET(request: NextRequest) {
   try {
   const { searchParams } = new URL(request.url);
-  const username = searchParams.get("username")?.trim().toLowerCase();
+  const rawUsername = searchParams.get("username")?.trim();
 
-  if (!username) {
+  if (!rawUsername) {
     return NextResponse.json(
       { error: "username is required" },
       { status: 400 }
     );
   }
 
-  if (!isValidTwitchUsername(username)) {
+  const username = parseTwitchInput(rawUsername);
+  if (!username) {
     return NextResponse.json(
-      { error: "Invalid username format" },
+      { error: "Invalid Twitch username or URL" },
       { status: 400 }
     );
   }

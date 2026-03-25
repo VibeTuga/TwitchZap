@@ -1,6 +1,8 @@
 const TWITCH_USERNAME_RE = /^[a-zA-Z0-9_]{1,25}$/;
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const TWITCH_URL_RE =
+  /^(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]{1,25})\/?(?:\?.*)?$/;
 
 export function validateOrigin(request: Request): boolean {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -9,15 +11,15 @@ export function validateOrigin(request: Request): boolean {
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
 
-  const allowedOrigin = new URL(appUrl).origin;
+  const allowedOrigin = new URL(appUrl).origin.replace(/\/$/, "");
 
   if (origin) {
-    return origin === allowedOrigin;
+    return origin.replace(/\/$/, "") === allowedOrigin;
   }
 
   if (referer) {
     try {
-      return new URL(referer).origin === allowedOrigin;
+      return new URL(referer).origin.replace(/\/$/, "") === allowedOrigin;
     } catch {
       return false;
     }
@@ -25,6 +27,25 @@ export function validateOrigin(request: Request): boolean {
 
   // No origin or referer header — likely a server-side or same-origin request
   return true;
+}
+
+export function parseTwitchInput(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  // Try matching as a Twitch URL first
+  const urlMatch = trimmed.match(TWITCH_URL_RE);
+  if (urlMatch) {
+    const username = urlMatch[1].toLowerCase();
+    return TWITCH_USERNAME_RE.test(username) ? username : null;
+  }
+
+  // Try as a raw username
+  if (TWITCH_USERNAME_RE.test(trimmed)) {
+    return trimmed.toLowerCase();
+  }
+
+  return null;
 }
 
 export function isValidTwitchUsername(value: unknown): value is string {

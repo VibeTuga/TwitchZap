@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { streams, queue, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { checkAndAwardBadges } from "@/lib/badges";
-import { isValidTwitchUsername, validateOrigin } from "@/lib/validation";
+import { parseTwitchInput, validateOrigin } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 500, limit: 5 });
@@ -34,17 +34,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const twitchUsername = body.twitch_username?.trim().toLowerCase();
-  if (!twitchUsername) {
+  const rawUsername = body.twitch_username?.trim();
+  if (!rawUsername) {
     return NextResponse.json(
       { error: "twitch_username is required" },
       { status: 400 }
     );
   }
 
-  if (!isValidTwitchUsername(twitchUsername)) {
+  const twitchUsername = parseTwitchInput(rawUsername);
+  if (!twitchUsername) {
     return NextResponse.json(
-      { error: "Invalid Twitch username format" },
+      { error: "Invalid Twitch username or URL" },
       { status: 400 }
     );
   }
