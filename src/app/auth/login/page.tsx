@@ -1,15 +1,21 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginContent() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
+  const next = searchParams.get("next") || "/";
   const supabase = createClient();
 
   async function handleLogin() {
     await supabase.auth.signInWithOAuth({
       provider: "twitch",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         scopes: "user:read:email",
       },
     });
@@ -18,6 +24,15 @@ export default function LoginPage() {
   return (
     <div className="flex flex-1 items-center justify-center min-h-[60vh]">
       <div className="text-center space-y-8">
+        {error && (
+          <div className="mx-auto max-w-sm rounded-xl bg-red-500/10 border border-red-500/30 px-4 py-3 text-sm text-red-400">
+            <p className="font-bold">Authentication failed</p>
+            <p className="mt-1 text-red-400/80">
+              {errorDescription || error}
+            </p>
+          </div>
+        )}
+
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="w-14 h-14 rounded-xl bg-primary-dim flex items-center justify-center shadow-[0_0_30px_rgba(170,48,250,0.5)]">
             <span
@@ -56,5 +71,13 @@ export default function LoginPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }
