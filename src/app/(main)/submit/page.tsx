@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton-card";
+import { parseTwitchInput } from "@/lib/validation";
 
 interface AuthUser {
   id: string;
@@ -81,6 +82,12 @@ export default function SubmitPage() {
     const trimmed = username.trim();
     if (!trimmed) return;
 
+    const parsed = parseTwitchInput(trimmed);
+    if (!parsed) {
+      setError("Invalid Twitch username or URL");
+      return;
+    }
+
     setChecking(true);
     setCheckResult(null);
     setSubmitResult(null);
@@ -88,7 +95,7 @@ export default function SubmitPage() {
 
     try {
       const res = await fetch(
-        `/api/streams/check?username=${encodeURIComponent(trimmed)}`
+        `/api/streams/check?username=${encodeURIComponent(parsed)}`
       );
       const data = await res.json();
 
