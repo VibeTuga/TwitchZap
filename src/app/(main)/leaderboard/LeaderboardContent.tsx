@@ -289,11 +289,7 @@ export function LeaderboardContent({
 
                 {/* Name */}
                 <div className="flex-1 min-w-0">
-                  <span
-                    className={`text-sm font-headline font-bold truncate ${
-                      isTopThree ? "text-on-surface" : "text-on-surface"
-                    }`}
-                  >
+                  <span className="text-sm font-headline font-bold truncate text-on-surface">
                     {entry.user.twitch_display_name ??
                       entry.user.twitch_username}
                   </span>
