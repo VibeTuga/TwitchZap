@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getQueue, getRecentBroadcasts } from "@/lib/queue";
+import { getUser } from "@/lib/auth";
 import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -11,8 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SchedulePage() {
-  const queueEntries = await getQueue("waiting");
-  const recentBroadcasts = await getRecentBroadcasts();
+  const [user, queueEntries, recentBroadcasts] = await Promise.all([
+    getUser(),
+    getQueue("waiting"),
+    getRecentBroadcasts(),
+  ]);
 
   // Check for active broadcast
   const [activeBroadcast] = await db
@@ -54,6 +58,8 @@ export default async function SchedulePage() {
           queueEntries={queueEntries}
           recentBroadcasts={recentBroadcasts}
           activeBroadcastId={activeBroadcast?.id ?? null}
+          currentUserId={user?.profile.id ?? null}
+          currentUserPoints={user?.profile.zapPoints ?? 0}
         />
       </ErrorBoundary>
     </div>
