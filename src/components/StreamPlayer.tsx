@@ -94,7 +94,14 @@ export function StreamPlayer({
         width: "100%",
         height: "100%",
         autoplay: true,
-        muted: false,
+        muted: true,
+      });
+
+      // Unmute once the user has interacted with the page
+      player.addEventListener(window.Twitch.Player.PLAYING, () => {
+        if (document.hasFocus()) {
+          player.setMuted(false);
+        }
       });
 
       playerRef.current = player;
