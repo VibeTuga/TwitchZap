@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<
               error
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-on-surface-variant">
             {this.props.fallbackMessage ?? "Something went wrong"}
           </p>
           <button
