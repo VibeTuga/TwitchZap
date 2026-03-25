@@ -3,8 +3,10 @@ import { getUser } from "@/lib/auth";
 import { canVote } from "@/lib/voting";
 import { db } from "@/db";
 import { votes, broadcasts, users } from "@/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { awardPoints } from "@/lib/points";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -116,6 +118,12 @@ export async function POST(request: NextRequest) {
     })
     .where(eq(users.id, user.profile.id));
 
+  // Award 5 points for voting
+  await awardPoints(user.profile.id, 5, "voting", broadcast_id);
+
+  // Check for new badges
+  const newBadges = await checkAndAwardBadges(user.profile.id);
+
   // Broadcast vote_update via Supabase Realtime
   const currentSkip = (broadcast.skipVotes ?? 0) + skipInc;
   const currentStay = (broadcast.stayVotes ?? 0) + stayInc;
@@ -138,5 +146,7 @@ export async function POST(request: NextRequest) {
       skip: currentSkip,
       stay: currentStay,
     },
+    points_earned: 5,
+    new_badges: newBadges,
   });
 }

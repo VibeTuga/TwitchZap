@@ -5,6 +5,7 @@ import { addToQueue } from "@/lib/queue";
 import { db } from "@/db";
 import { streams, queue, users } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -134,6 +135,9 @@ export async function POST(request: NextRequest) {
     })
     .where(eq(users.id, user.profile.id));
 
+  // Check for new badges
+  const newBadges = await checkAndAwardBadges(user.profile.id);
+
   return NextResponse.json({
     success: true,
     queue_position: queueEntry.position,
@@ -146,5 +150,6 @@ export async function POST(request: NextRequest) {
       viewer_count: streamInfo.viewer_count,
       title: streamInfo.title,
     },
+    new_badges: newBadges,
   });
 }

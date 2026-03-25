@@ -1,8 +1,46 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { UserMenu } from "./UserMenu";
+import { ZapPoints } from "@/components/gamification/ZapPoints";
 
 export function TopBar() {
+  const [zapPoints, setZapPoints] = useState<number | null>(null);
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    async function fetchPoints() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setZapPoints(null);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("users")
+        .select("zap_points")
+        .eq("id", user.id)
+        .single();
+
+      if (data) {
+        setZapPoints(data.zap_points);
+      }
+    }
+
+    fetchPoints();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      fetchPoints();
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
   return (
     <header className="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-xl flex items-center justify-between px-8 h-16 lg:ml-64 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">
       {/* Search */}
@@ -19,13 +57,9 @@ export function TopBar() {
 
       {/* Right actions */}
       <div className="flex items-center gap-6">
-        {/* Zap Points */}
-        <button className="hidden md:flex items-center gap-2 bg-primary-dim/10 hover:bg-primary-dim/20 px-4 py-2 rounded-full border border-primary-dim/20 transition-all group">
-          <span className="material-symbols-outlined text-primary-dim group-hover:scale-110 transition-transform">
-            bolt
-          </span>
-          <span className="text-sm text-primary">Zap Points: 0</span>
-        </button>
+        {zapPoints !== null && (
+          <ZapPoints points={zapPoints} className="hidden md:flex" />
+        )}
 
         <UserMenu />
       </div>

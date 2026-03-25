@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import {
-  broadcasts,
-  streams,
-  queue,
-  users,
-  pointTransactions,
-} from "@/db/schema";
+import { broadcasts, streams, queue } from "@/db/schema";
 import { eq, sql, asc } from "drizzle-orm";
 import { tallyVotes } from "@/lib/voting";
 import { applyCooldownReductions } from "@/lib/cooldown";
 import { getStreamInfo } from "@/lib/twitch/api";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { awardPoints, awardWatchTimePoints } from "@/lib/points";
+import { checkAndAwardBadges } from "@/lib/badges";
 
 export async function GET(request: NextRequest) {
   // Verify CRON_SECRET
@@ -83,6 +79,9 @@ export async function GET(request: NextRequest) {
           .set({ status: "completed", completedAt: sql`NOW()` })
           .where(eq(queue.id, current.queueEntryId));
 
+        // Award watch-time points for offline-ended broadcast
+        await awardWatchTimePoints(current.id);
+
         await supabase.channel("broadcast-live").send({
           type: "broadcast",
           event: "stream_ended",
@@ -138,6 +137,12 @@ export async function GET(request: NextRequest) {
           current.submittedBy
         );
 
+        // Award watch-time points and check badges for viewers
+        await awardWatchTimePoints(current.id);
+        if (current.submittedBy) {
+          await checkAndAwardBadges(current.submittedBy);
+        }
+
         await supabase.channel("broadcast-live").send({
           type: "broadcast",
           event: "stream_skipped",
@@ -180,6 +185,7 @@ export async function GET(request: NextRequest) {
             "extension_bonus",
             current.id
           );
+          await checkAndAwardBadges(current.submittedBy);
         }
 
         await supabase.channel("broadcast-live").send({
@@ -242,6 +248,12 @@ export async function GET(request: NextRequest) {
             "discovery_bonus",
             current.id
           );
+        }
+
+        // Award watch-time points and check badges for submitter
+        await awardWatchTimePoints(current.id);
+        if (current.submittedBy) {
+          await checkAndAwardBadges(current.submittedBy);
         }
 
         await supabase.channel("broadcast-live").send({
@@ -376,37 +388,3 @@ async function getNextLiveStream(): Promise<{
   return null;
 }
 
-async function awardPoints(
-  userId: string,
-  amount: number,
-  reason: string,
-  referenceId: string
-) {
-  // Get current balance
-  const [user] = await db
-    .select({ zapPoints: users.zapPoints })
-    .from(users)
-    .where(eq(users.id, userId))
-    .limit(1);
-
-  if (!user) return;
-
-  const newBalance = user.zapPoints + amount;
-
-  await db
-    .update(users)
-    .set({
-      zapPoints: newBalance,
-      totalPointsEarned: sql`${users.totalPointsEarned} + ${amount}`,
-      updatedAt: sql`NOW()`,
-    })
-    .where(eq(users.id, userId));
-
-  await db.insert(pointTransactions).values({
-    userId,
-    amount,
-    reason,
-    referenceId,
-    balanceAfter: newBalance,
-  });
-}
