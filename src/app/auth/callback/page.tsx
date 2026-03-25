@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
         const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (error) {
-          router.replace("/login?error=auth_failed");
+          router.replace("/auth/login?error=auth_failed");
           return;
         }
 
@@ -28,27 +28,42 @@ export default function AuthCallbackPage() {
             meta?.preferred_username || meta?.user_name;
 
           if (!twitchId || !twitchUsername) {
-            router.replace("/login?error=missing_profile");
+            router.replace("/auth/login?error=missing_profile");
             return;
           }
 
           const displayName = meta?.name || meta?.full_name || twitchUsername;
           const avatar = meta?.picture || meta?.avatar_url || "";
 
-          try {
-            await fetch("/api/auth/upsert-user", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: data.user.id,
-                twitchId,
-                twitchUsername,
-                displayName,
-                avatar,
-              }),
-            });
-          } catch {
-            // User upsert failed silently — profile may be created on next visit
+          const upsertPayload = {
+            id: data.user.id,
+            twitchId,
+            twitchUsername,
+            displayName,
+            avatar,
+          };
+
+          let upsertOk = false;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const res = await fetch("/api/auth/upsert-user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(upsertPayload),
+              });
+              if (res.ok) {
+                upsertOk = true;
+                break;
+              }
+            } catch {
+              // Network error — will retry if first attempt
+            }
+          }
+
+          if (!upsertOk) {
+            console.warn(
+              "[auth/callback] Profile upsert failed after 2 attempts — will retry on next server request"
+            );
           }
         }
       }
