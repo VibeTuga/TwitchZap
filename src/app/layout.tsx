@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "TwitchZap — Community-Powered Stream Discovery",
@@ -17,9 +17,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("dark h-full antialiased", "font-sans", geist.variable)}>
-      <body className="min-h-full flex flex-col bg-background text-on-surface font-body">
-        {children}
+    <html lang="en" className="dark h-full antialiased">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-full bg-background text-on-surface font-body">
+        <Sidebar />
+        <TopBar />
+        <main className="lg:ml-64 p-8 min-h-screen pb-24 lg:pb-8">
+          <div className="max-w-[1600px] mx-auto">{children}</div>
+        </main>
+        <MobileNav />
+        <Toaster />
       </body>
     </html>
   );

@@ -1,0 +1,121 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+
+export function UserMenu() {
+  const [user, setUser] = useState<User | null>(null);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase.auth]);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    setOpen(false);
+    window.location.href = "/";
+  }
+
+  if (!user) {
+    return (
+      <>
+        <button
+          onClick={() =>
+            supabase.auth.signInWithOAuth({
+              provider: "twitch",
+              options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+                scopes: "user:read:email",
+              },
+            })
+          }
+          className="hidden md:flex items-center gap-2 bg-[#9146FF]/20 hover:bg-[#9146FF]/40 px-4 py-2 rounded-full border border-[#9146FF]/40 backdrop-blur-md transition-all group shadow-[0_0_15px_rgba(145,70,255,0.3)] hover:shadow-[0_0_20px_rgba(145,70,255,0.5)]"
+        >
+          <span className="material-symbols-outlined text-[#bf94ff] text-sm group-hover:rotate-12 transition-transform">
+            link
+          </span>
+          <span className="text-[11px] font-bold text-white tracking-wide">
+            Connect with Twitch
+          </span>
+        </button>
+        <span className="material-symbols-outlined text-slate-300 hover:text-[#22d3ee] cursor-pointer transition-colors">
+          notifications
+        </span>
+      </>
+    );
+  }
+
+  const avatarUrl =
+    user.user_metadata?.picture ||
+    user.user_metadata?.avatar_url;
+  const displayName =
+    user.user_metadata?.name ||
+    user.user_metadata?.preferred_username ||
+    "User";
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setOpen(!open)}
+          className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary-dim cursor-pointer"
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-primary-dim flex items-center justify-center text-xs font-bold text-on-primary-fixed">
+              {displayName[0]?.toUpperCase()}
+            </div>
+          )}
+        </button>
+
+        {open && (
+          <div className="absolute right-0 top-full mt-2 w-48 bg-surface-container-high rounded-xl py-2 shadow-2xl z-50">
+            <div className="px-4 py-2 border-b border-outline-variant/20">
+              <p className="text-sm font-bold text-on-surface truncate">
+                {displayName}
+              </p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="w-full text-left px-4 py-2 text-sm text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
+      </div>
+      <span className="material-symbols-outlined text-slate-300 hover:text-[#22d3ee] cursor-pointer transition-colors">
+        notifications
+      </span>
+    </div>
+  );
+}
