@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUser } from "@/lib/auth";
 import { db } from "@/db";
-import { users, pointTransactions, votes } from "@/db/schema";
+import { users, pointTransactions, votes, queue } from "@/db/schema";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
 
 type LeaderboardType = "points" | "submissions" | "votes";
@@ -128,8 +128,7 @@ export async function GET(request: NextRequest) {
         value: Number(row.value),
         rank: idx + 1,
       }));
-    } else {
-      // votes or submissions — count from the respective tables
+    } else if (type === "votes") {
       const rows = await db
         .select({
           id: users.id,
@@ -155,6 +154,45 @@ export async function GET(request: NextRequest) {
           users.twitchAvatarUrl
         )
         .orderBy(desc(sql`COUNT(${votes.id})`))
+        .limit(LEADERBOARD_LIMIT);
+
+      rankings = rows.map((row, idx) => ({
+        user: {
+          id: row.id,
+          twitch_username: row.twitchUsername,
+          twitch_display_name: row.twitchDisplayName,
+          twitch_avatar_url: row.twitchAvatarUrl,
+        },
+        value: Number(row.value),
+        rank: idx + 1,
+      }));
+    } else {
+      // submissions — count from queue table
+      const rows = await db
+        .select({
+          id: users.id,
+          twitchUsername: users.twitchUsername,
+          twitchDisplayName: users.twitchDisplayName,
+          twitchAvatarUrl: users.twitchAvatarUrl,
+          value: sql<number>`COUNT(${queue.id})`,
+        })
+        .from(users)
+        .leftJoin(
+          queue,
+          and(
+            eq(queue.submittedBy, users.id),
+            periodStart
+              ? gte(queue.submittedAt, periodStart.toISOString())
+              : undefined
+          )
+        )
+        .groupBy(
+          users.id,
+          users.twitchUsername,
+          users.twitchDisplayName,
+          users.twitchAvatarUrl
+        )
+        .orderBy(desc(sql`COUNT(${queue.id})`))
         .limit(LEADERBOARD_LIMIT);
 
       rankings = rows.map((row, idx) => ({
