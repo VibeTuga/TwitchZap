@@ -17,10 +17,7 @@ export function TopBar() {
   const { viewerCount } = usePresence(user?.id ?? null);
 
   useEffect(() => {
-    if (!user) {
-      setZapPoints(null);
-      return;
-    }
+    if (!user) return;
 
     supabase
       .from("users")
@@ -28,8 +25,10 @@ export function TopBar() {
       .eq("id", user.id)
       .single()
       .then(({ data }) => {
-        if (data) setZapPoints(data.zap_points);
+        setZapPoints(data ? data.zap_points : null);
       });
+
+    return () => setZapPoints(null);
   }, [user, supabase]);
 
   return (

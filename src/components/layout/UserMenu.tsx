@@ -14,10 +14,8 @@ export function UserMenu() {
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
-    if (!user) {
-      setIsAdmin(false);
-      return;
-    }
+    if (!user) return;
+
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -25,6 +23,8 @@ export function UserMenu() {
         else setIsAdmin(false);
       })
       .catch(() => setIsAdmin(false));
+
+    return () => setIsAdmin(false);
   }, [user]);
 
   useEffect(() => {
