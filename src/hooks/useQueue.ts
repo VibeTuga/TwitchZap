@@ -1,31 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useQueueStore, type QueueEntry } from "@/stores/queueStore";
 
-interface QueueEntry {
-  id: string;
-  position: number;
-  status: string;
-  submittedAt: string;
-  stream: {
-    id: string;
-    twitchUsername: string;
-    twitchDisplayName: string | null;
-    twitchAvatarUrl: string | null;
-    category: string | null;
-  } | null;
-  submittedBy: {
-    id: string;
-    twitchUsername: string;
-    twitchDisplayName: string | null;
-    twitchAvatarUrl: string | null;
-  } | null;
-}
+export type { QueueEntry };
 
 export function useQueue() {
-  const [queue, setQueue] = useState<QueueEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queue = useQueueStore((s) => s.queue);
+  const loading = useQueueStore((s) => s.loading);
+  const setQueue = useQueueStore((s) => s.setQueue);
+  const setLoading = useQueueStore((s) => s.setLoading);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -37,7 +22,7 @@ export function useQueue() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setQueue, setLoading]);
 
   useEffect(() => {
     fetchQueue();

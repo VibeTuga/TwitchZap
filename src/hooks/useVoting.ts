@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
-
-interface VoteCounts {
-  skip: number;
-  stay: number;
-  total: number;
-}
+import { useVotingStore } from "@/stores/votingStore";
 
 export function useVoting(broadcastId: string | null) {
-  const [counts, setCounts] = useState<VoteCounts>({
-    skip: 0,
-    stay: 0,
-    total: 0,
-  });
-  const [hasVoted, setHasVoted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const counts = useVotingStore((s) => s.counts);
+  const hasVoted = useVotingStore((s) => s.hasVoted);
+  const isSubmitting = useVotingStore((s) => s.isSubmitting);
+  const setCounts = useVotingStore((s) => s.setCounts);
+  const setHasVoted = useVotingStore((s) => s.setHasVoted);
+  const setIsSubmitting = useVotingStore((s) => s.setIsSubmitting);
+  const reset = useVotingStore((s) => s.reset);
 
   useEffect(() => {
     if (!broadcastId) return;
@@ -27,7 +22,10 @@ export function useVoting(broadcastId: string | null) {
     const channel = supabase
       .channel("votes-live")
       .on("broadcast", { event: "vote_update" }, (payload) => {
-        const data = payload.payload as VoteCounts & {
+        const data = payload.payload as {
+          skip: number;
+          stay: number;
+          total: number;
           broadcast_id: string;
         };
         if (data.broadcast_id === broadcastId) {
@@ -44,7 +42,7 @@ export function useVoting(broadcastId: string | null) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [broadcastId]);
+  }, [broadcastId, setCounts]);
 
   const castVote = useCallback(
     async (vote: "skip" | "stay") => {
@@ -82,13 +80,8 @@ export function useVoting(broadcastId: string | null) {
         setIsSubmitting(false);
       }
     },
-    [broadcastId, hasVoted, isSubmitting]
+    [broadcastId, hasVoted, isSubmitting, setCounts, setHasVoted, setIsSubmitting]
   );
-
-  const reset = useCallback(() => {
-    setHasVoted(false);
-    setCounts({ skip: 0, stay: 0, total: 0 });
-  }, []);
 
   return { counts, hasVoted, isSubmitting, castVote, setHasVoted, reset };
 }
