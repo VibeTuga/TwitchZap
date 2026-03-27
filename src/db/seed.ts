@@ -6,8 +6,8 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 import { badges } from "./schema";
 
 const badgeSeedData = [
@@ -134,8 +134,8 @@ const badgeSeedData = [
 ];
 
 async function seed() {
-  const client = postgres(process.env.DATABASE_URL!);
-  const database = drizzle(client);
+  const sql = neon(process.env.DATABASE_URL!);
+  const database = drizzle(sql);
 
   console.log("Seeding badges...");
 
@@ -148,7 +148,6 @@ async function seed() {
 
   console.log(`Seeded ${badgeSeedData.length} badges.`);
 
-  await client.end();
   process.exit(0);
 }
 
