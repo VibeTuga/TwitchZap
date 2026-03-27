@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/stores/authStore";
 import { UserMenu } from "./UserMenu";
 import { ZapPoints } from "@/components/gamification/ZapPoints";
 import { useSoundEffects } from "@/lib/sounds";

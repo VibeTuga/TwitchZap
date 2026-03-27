@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton-card";
 import { parseTwitchInput } from "@/lib/validation";
-import { useAuth } from "@/components/AuthProvider";
+import { useAuth } from "@/stores/authStore";
 
 interface ChannelInfo {
   id: string;
