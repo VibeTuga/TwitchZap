@@ -53,7 +53,7 @@ interface SubmissionResult {
 }
 
 export default function SubmitPage() {
-  const { user, ready, isLoggedIn } = useAuth();
+  const { ready, isLoggedIn } = useAuth();
   const [username, setUsername] = useState("");
   const [checking, setChecking] = useState(false);
   const [submitting, setSubmitting] = useState(false);
