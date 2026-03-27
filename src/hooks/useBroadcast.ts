@@ -1,51 +1,22 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  useBroadcastStore,
+  type BroadcastState,
+} from "@/stores/broadcastStore";
 
-export interface BroadcastState {
-  id: string;
-  queueEntryId: string;
-  streamId: string;
-  submittedBy: string | null;
-  startedAt: string;
-  scheduledEndAt: string;
-  actualEndAt: string | null;
-  extensionsCount: number;
-  maxExtensions: number;
-  status: string;
-  votingOpensAt: string | null;
-  votingResult: string | null;
-  totalVotes: number;
-  skipVotes: number;
-  stayVotes: number;
-  streamTitle: string | null;
-  streamCategory: string | null;
-  streamViewerCount: number | null;
-  offlineDetectedAt: string | null;
-  gracePeriodExpiresAt: string | null;
-  recoveryCount: number;
-  stream: {
-    id: string;
-    twitchUsername: string;
-    twitchDisplayName: string | null;
-    twitchAvatarUrl: string | null;
-    category: string | null;
-    twitchChannelId: string;
-  } | null;
-  submitter: {
-    id: string;
-    twitchUsername: string;
-    twitchDisplayName: string | null;
-    twitchAvatarUrl: string | null;
-  } | null;
-  has_voted: boolean;
-}
+export type { BroadcastState };
 
 export function useBroadcast() {
-  const [broadcast, setBroadcast] = useState<BroadcastState | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isReconnecting, setIsReconnecting] = useState(false);
+  const broadcast = useBroadcastStore((s) => s.broadcast);
+  const loading = useBroadcastStore((s) => s.loading);
+  const isReconnecting = useBroadcastStore((s) => s.isReconnecting);
+  const setBroadcast = useBroadcastStore((s) => s.setBroadcast);
+  const setLoading = useBroadcastStore((s) => s.setLoading);
+  const setIsReconnecting = useBroadcastStore((s) => s.setIsReconnecting);
+  const updateBroadcast = useBroadcastStore((s) => s.updateBroadcast);
 
   const fetchBroadcast = useCallback(async () => {
     try {
@@ -57,7 +28,7 @@ export function useBroadcast() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setBroadcast, setLoading]);
 
   useEffect(() => {
     fetchBroadcast();
@@ -74,7 +45,7 @@ export function useBroadcast() {
       "broadcast",
       { event: "voting_open" },
       () => {
-        setBroadcast((prev) =>
+        updateBroadcast((prev) =>
           prev ? { ...prev, status: "voting" } : null
         );
       }
@@ -87,7 +58,7 @@ export function useBroadcast() {
           stay: number;
           total: number;
         };
-        setBroadcast((prev) =>
+        updateBroadcast((prev) =>
           prev
             ? {
                 ...prev,
@@ -106,7 +77,7 @@ export function useBroadcast() {
           new_end: string;
           extensions_count: number;
         };
-        setBroadcast((prev) =>
+        updateBroadcast((prev) =>
           prev
             ? {
                 ...prev,
@@ -141,7 +112,7 @@ export function useBroadcast() {
           grace_period_expires_at: string;
         };
         setIsReconnecting(true);
-        setBroadcast((prev) =>
+        updateBroadcast((prev) =>
           prev
             ? { ...prev, gracePeriodExpiresAt: data.grace_period_expires_at }
             : null
@@ -152,7 +123,7 @@ export function useBroadcast() {
       { event: "stream_recovered" },
       () => {
         setIsReconnecting(false);
-        setBroadcast((prev) =>
+        updateBroadcast((prev) =>
           prev
             ? {
                 ...prev,
@@ -180,7 +151,7 @@ export function useBroadcast() {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [fetchBroadcast]);
+  }, [fetchBroadcast, setBroadcast, setIsReconnecting, updateBroadcast]);
 
   return { broadcast, loading, isReconnecting, refetch: fetchBroadcast };
 }
