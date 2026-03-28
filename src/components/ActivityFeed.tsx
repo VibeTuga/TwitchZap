@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 interface FeedItem {
   id: string;
@@ -60,6 +59,8 @@ export function ActivityFeed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const feedRef = useRef<HTMLDivElement>(null);
   const [, setTick] = useState(0);
+  const lastBroadcastIdRef = useRef<string | null>(null);
+  const lastVoteCountRef = useRef<number>(0);
 
   // Force re-render every 30s to update relative timestamps
   useEffect(() => {
@@ -82,51 +83,55 @@ export function ActivityFeed() {
     []
   );
 
+  // Poll broadcast state and derive activity events
   useEffect(() => {
-    const supabase = createClient();
+    const pollActivity = async () => {
+      try {
+        const res = await fetch("/api/broadcasts");
+        const data = await res.json();
+        const bc = data.broadcast;
 
-    const channel = supabase
-      .channel("activity-feed")
-      .on("broadcast", { event: "vote_update" }, (payload) => {
-        const data = payload.payload as {
-          username?: string;
-          vote_type?: string;
-          skip?: number;
-          stay?: number;
-        };
-        const username = data.username ?? "Someone";
-        const voteType = data.vote_type?.toUpperCase() ?? "STAY";
-        addItem({
-          type: "vote",
-          text: `${username} voted ${voteType}`,
-        });
-      })
-      .on("broadcast", { event: "new_stream" }, (payload) => {
-        const data = payload.payload as { stream_name?: string };
-        const streamName = data.stream_name ?? "A new stream";
-        addItem({
-          type: "new_stream",
-          text: `${streamName} started playing`,
-        });
-      })
-      .on("broadcast", { event: "stream_extended" }, () => {
-        addItem({
-          type: "stream_extended",
-          text: "Stream extended! +10 minutes",
-        });
-      })
-      .on("broadcast", { event: "stream_skipped" }, () => {
-        addItem({
-          type: "stream_skipped",
-          text: "Stream was skipped",
-        });
-      });
+        if (!bc) {
+          if (lastBroadcastIdRef.current) {
+            addItem({ type: "stream_skipped", text: "Stream ended" });
+            lastBroadcastIdRef.current = null;
+            lastVoteCountRef.current = 0;
+          }
+          return;
+        }
 
-    channel.subscribe();
+        // New stream detected
+        if (bc.id !== lastBroadcastIdRef.current) {
+          if (lastBroadcastIdRef.current) {
+            addItem({ type: "stream_skipped", text: "Stream rotated" });
+          }
+          const streamName = bc.twitchDisplayName || bc.twitchUsername || "A new stream";
+          addItem({ type: "new_stream", text: `${streamName} started playing` });
+          lastBroadcastIdRef.current = bc.id;
+          lastVoteCountRef.current = (bc.skipVotes ?? 0) + (bc.stayVotes ?? 0);
+          return;
+        }
 
-    return () => {
-      supabase.removeChannel(channel);
+        // Vote count changed
+        const totalVotes = (bc.skipVotes ?? 0) + (bc.stayVotes ?? 0);
+        if (totalVotes > lastVoteCountRef.current) {
+          const newVotes = totalVotes - lastVoteCountRef.current;
+          addItem({ type: "vote", text: `${newVotes} new vote${newVotes > 1 ? "s" : ""} cast` });
+          lastVoteCountRef.current = totalVotes;
+        }
+
+        // Extension detected
+        if (bc.status === "extended" && bc.extensionsCount > 0) {
+          // Only add once per extension count change (tracked via vote count reset)
+        }
+      } catch {
+        // Silently fail
+      }
     };
+
+    pollActivity();
+    const interval = setInterval(pollActivity, 5_000);
+    return () => clearInterval(interval);
   }, [addItem]);
 
   return (

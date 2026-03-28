@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/", label: "Live Stream", icon: "sensors", filled: true },
@@ -25,6 +24,8 @@ export function Sidebar() {
         if (data.broadcast) {
           const total = data.broadcast.totalVotes ?? 0;
           setQuorum(Math.min(total / 5, 1) * 100);
+        } else {
+          setQuorum(0);
         }
       } catch {
         // Silently fail
@@ -32,42 +33,9 @@ export function Sidebar() {
     }
 
     fetchQuorum();
+    const interval = setInterval(fetchQuorum, 10_000);
 
-    const supabase = createClient();
-    const channel = supabase.channel("sidebar-quorum").on(
-      "broadcast",
-      { event: "vote_update" },
-      (payload) => {
-        const data = payload.payload as { total?: number };
-        if (data.total !== undefined) {
-          setQuorum(Math.min(data.total / 5, 1) * 100);
-        }
-      }
-    ).on(
-      "broadcast",
-      { event: "new_stream" },
-      () => {
-        setQuorum(0);
-      }
-    ).on(
-      "broadcast",
-      { event: "stream_skipped" },
-      () => {
-        setQuorum(0);
-      }
-    ).on(
-      "broadcast",
-      { event: "stream_ended" },
-      () => {
-        setQuorum(0);
-      }
-    );
-
-    channel.subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/stores/authStore";
 import { UserMenu } from "./UserMenu";
 import { ZapPoints } from "@/components/gamification/ZapPoints";
@@ -12,24 +11,21 @@ import { usePresence } from "@/hooks/usePresence";
 export function TopBar() {
   const { user } = useAuth();
   const [zapPoints, setZapPoints] = useState<number | null>(null);
-  const supabase = useMemo(() => createClient(), []);
   const { soundEnabled, toggleSound } = useSoundEffects();
   const { viewerCount } = usePresence(user?.id ?? null);
 
   useEffect(() => {
     if (!user) return;
 
-    supabase
-      .from("users")
-      .select("zap_points")
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        setZapPoints(data ? data.zap_points : null);
-      });
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.zapPoints != null) setZapPoints(data.zapPoints);
+      })
+      .catch(() => {});
 
     return () => setZapPoints(null);
-  }, [user, supabase]);
+  }, [user]);
 
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8 h-14 md:h-16 shadow-[0_4px_30px_rgba(170,48,250,0.1)] font-headline font-semibold">

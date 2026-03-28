@@ -5,7 +5,6 @@ import { eq, sql, asc } from "drizzle-orm";
 import { tallyVotes } from "@/lib/voting";
 import { applyCooldownReductions } from "@/lib/cooldown";
 import { getStreamInfo } from "@/lib/twitch/api";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { awardPoints, awardWatchTimePoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
 
@@ -22,7 +21,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createAdminClient();
   const now = new Date();
 
   // (1) Query current broadcast
@@ -43,11 +41,6 @@ export async function GET(request: NextRequest) {
         .set({ status: "voting" })
         .where(eq(broadcasts.id, current.id));
 
-      await supabase.channel("broadcast-live").send({
-        type: "broadcast",
-        event: "voting_open",
-        payload: { broadcast_id: current.id },
-      });
     }
   }
 
@@ -76,14 +69,6 @@ export async function GET(request: NextRequest) {
           })
           .where(eq(broadcasts.id, current.id));
 
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_reconnecting",
-          payload: {
-            broadcast_id: current.id,
-            grace_period_expires_at: gracePeriodExpiresAt.toISOString(),
-          },
-        });
       } else if (streamInfo && current.offlineDetectedAt) {
         // Stream recovered — clear offline state
         await db
@@ -96,11 +81,6 @@ export async function GET(request: NextRequest) {
           })
           .where(eq(broadcasts.id, current.id));
 
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_recovered",
-          payload: { broadcast_id: current.id },
-        });
       }
     }
   }
@@ -141,12 +121,6 @@ export async function GET(request: NextRequest) {
 
         // Award watch-time points for offline-ended broadcast
         await awardWatchTimePoints(current.id);
-
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_ended",
-          payload: { broadcast_id: current.id, reason: "offline" },
-        });
 
         justEnded = true;
       }
@@ -203,12 +177,6 @@ export async function GET(request: NextRequest) {
           await checkAndAwardBadges(current.submittedBy);
         }
 
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_skipped",
-          payload: { broadcast_id: current.id },
-        });
-
         justEnded = true;
       } else if (
         tally.result === "stay" &&
@@ -248,15 +216,6 @@ export async function GET(request: NextRequest) {
           await checkAndAwardBadges(current.submittedBy);
         }
 
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_extended",
-          payload: {
-            broadcast_id: current.id,
-            new_end: newEnd.toISOString(),
-            extensions_count: current.extensionsCount + 1,
-          },
-        });
       } else {
         // NO_QUORUM, NO_ACTION, or max extensions reached — complete
         await db
@@ -316,12 +275,6 @@ export async function GET(request: NextRequest) {
           await checkAndAwardBadges(current.submittedBy);
         }
 
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "stream_ended",
-          payload: { broadcast_id: current.id, reason: "completed" },
-        });
-
         justEnded = true;
       }
     }
@@ -358,21 +311,6 @@ export async function GET(request: NextRequest) {
         .update(queue)
         .set({ status: "playing", startedAt: sql`NOW()` })
         .where(eq(queue.id, nextStream.queueId));
-
-      await supabase.channel("broadcast-live").send({
-        type: "broadcast",
-        event: "new_stream",
-        payload: {
-          broadcast_id: newBroadcast.id,
-          stream: {
-            twitch_username: nextStream.twitchUsername,
-            twitch_display_name: nextStream.twitchDisplayName,
-            title: nextStream.streamTitle,
-            category: nextStream.streamCategory,
-            viewer_count: nextStream.viewerCount,
-          },
-        },
-      });
 
       return NextResponse.json({
         action: "started",

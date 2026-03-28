@@ -4,7 +4,6 @@ import { canVote } from "@/lib/voting";
 import { db } from "@/db";
 import { votes, broadcasts, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { awardPoints } from "@/lib/points";
 import { checkAndAwardBadges } from "@/lib/badges";
 import { isValidUUID, isValidVote, validateOrigin } from "@/lib/validation";
@@ -145,21 +144,8 @@ export async function POST(request: NextRequest) {
   // Check for new badges
   const newBadges = await checkAndAwardBadges(user.profile.id);
 
-  // Broadcast vote_update via Supabase Realtime
   const currentSkip = (broadcast.skipVotes ?? 0) + skipInc;
   const currentStay = (broadcast.stayVotes ?? 0) + stayInc;
-
-  const supabase = createAdminClient();
-  await supabase.channel("votes-live").send({
-    type: "broadcast",
-    event: "vote_update",
-    payload: {
-      broadcast_id,
-      skip: currentSkip,
-      stay: currentStay,
-      total: currentSkip + currentStay,
-    },
-  });
 
   return NextResponse.json({
     success: true,

@@ -13,6 +13,7 @@ export async function GET() {
       twitchUsername: user.profile.twitchUsername,
       twitchDisplayName: user.profile.twitchDisplayName,
       role: user.profile.role,
+      zapPoints: user.profile.zapPoints,
     });
   } catch {
     return NextResponse.json(

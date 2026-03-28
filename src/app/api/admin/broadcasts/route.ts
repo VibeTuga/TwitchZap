@@ -4,7 +4,6 @@ import { db } from "@/db";
 import { broadcasts, streams, queue } from "@/db/schema";
 import { eq, sql, asc } from "drizzle-orm";
 import { getStreamInfo } from "@/lib/twitch/api";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,14 +68,6 @@ export async function POST(request: NextRequest) {
       .set({ status: "completed", completedAt: sql`NOW()` })
       .where(eq(queue.id, current.queueEntryId));
 
-    const supabase = createAdminClient();
-
-    await supabase.channel("broadcast-live").send({
-      type: "broadcast",
-      event: "stream_ended",
-      payload: { broadcast_id: current.id, reason: "admin" },
-    });
-
     // For 'skip': also start the next live stream
     if (body.action === "skip") {
       const nextStream = await getNextLiveStream();
@@ -111,21 +102,6 @@ export async function POST(request: NextRequest) {
           .update(queue)
           .set({ status: "playing", startedAt: sql`NOW()` })
           .where(eq(queue.id, nextStream.queueId));
-
-        await supabase.channel("broadcast-live").send({
-          type: "broadcast",
-          event: "new_stream",
-          payload: {
-            broadcast_id: newBroadcast.id,
-            stream: {
-              twitch_username: nextStream.twitchUsername,
-              twitch_display_name: nextStream.twitchDisplayName,
-              title: nextStream.streamTitle,
-              category: nextStream.streamCategory,
-              viewer_count: nextStream.viewerCount,
-            },
-          },
-        });
 
         return NextResponse.json({
           success: true,

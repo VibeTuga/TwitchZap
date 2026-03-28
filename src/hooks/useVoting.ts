@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { useVotingStore } from "@/stores/votingStore";
 
 export function useVoting(broadcastId: string | null) {
@@ -14,34 +13,28 @@ export function useVoting(broadcastId: string | null) {
   const setIsSubmitting = useVotingStore((s) => s.setIsSubmitting);
   const reset = useVotingStore((s) => s.reset);
 
+  // Poll vote counts from broadcast endpoint
   useEffect(() => {
     if (!broadcastId) return;
 
-    const supabase = createClient();
-
-    const channel = supabase
-      .channel("votes-live")
-      .on("broadcast", { event: "vote_update" }, (payload) => {
-        const data = payload.payload as {
-          skip: number;
-          stay: number;
-          total: number;
-          broadcast_id: string;
-        };
-        if (data.broadcast_id === broadcastId) {
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch("/api/broadcasts");
+        const data = await res.json();
+        if (data.broadcast && data.broadcast.id === broadcastId) {
           setCounts({
-            skip: data.skip,
-            stay: data.stay,
-            total: data.total,
+            skip: data.broadcast.skipVotes ?? 0,
+            stay: data.broadcast.stayVotes ?? 0,
+            total: (data.broadcast.skipVotes ?? 0) + (data.broadcast.stayVotes ?? 0),
           });
         }
-      });
-
-    channel.subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
+      } catch {
+        // Silently fail
+      }
     };
+
+    const interval = setInterval(fetchCounts, 5_000);
+    return () => clearInterval(interval);
   }, [broadcastId, setCounts]);
 
   const castVote = useCallback(
