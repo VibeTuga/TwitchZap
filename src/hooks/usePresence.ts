@@ -1,36 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState, useCallback } from "react";
 
 export function usePresence(userId: string | null) {
   const [viewerCount, setViewerCount] = useState(0);
 
-  useEffect(() => {
-    const supabase = createClient();
-
-    const channel = supabase.channel("viewers", {
-      config: { presence: { key: userId ?? "anonymous" } },
-    });
-
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        setViewerCount(Object.keys(state).length);
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({
-            user_id: userId,
-            online_at: new Date().toISOString(),
-          });
-        }
+  const sendHeartbeat = useCallback(async () => {
+    if (!userId) return;
+    try {
+      await fetch("/api/viewer-sessions/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
       });
+    } catch {
+      // Silently fail
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    // Send initial heartbeat
+    sendHeartbeat();
+
+    // Send heartbeat every 30s
+    const heartbeatInterval = setInterval(sendHeartbeat, 30_000);
+
+    // Poll viewer count
+    const fetchViewerCount = async () => {
+      try {
+        const res = await fetch("/api/broadcasts");
+        const data = await res.json();
+        if (data.broadcast?.viewerCount != null) {
+          setViewerCount(data.broadcast.viewerCount);
+        }
+      } catch {
+        // Silently fail
+      }
+    };
+
+    fetchViewerCount();
+    const countInterval = setInterval(fetchViewerCount, 15_000);
 
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(heartbeatInterval);
+      clearInterval(countInterval);
     };
-  }, [userId]);
+  }, [sendHeartbeat]);
 
   return { viewerCount };
 }

@@ -3,7 +3,6 @@ import { getUser } from "@/lib/auth";
 import { db } from "@/db";
 import { broadcasts } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { isValidUUID, isValidLivenessStatus, validateOrigin } from "@/lib/validation";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -76,8 +75,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = createAdminClient();
-
   if (status === "offline") {
     // Add reporter to offline_reporters (deduplicate)
     const reporters = (broadcast.offlineReporters as { user_id: string; reported_at: string }[]) || [];
@@ -92,22 +89,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get viewer count from presence
-    const presenceChannel = supabase.channel("viewers");
-    const presenceState = presenceChannel.presenceState();
-    const viewerCount = Object.keys(presenceState).length || 1;
-    await supabase.removeChannel(presenceChannel);
-
-    // Determine consensus threshold
-    let threshold: number;
-    if (viewerCount <= 1) {
-      threshold = 1;
-    } else if (viewerCount === 2) {
-      threshold = 2;
-    } else {
-      threshold = 3;
-    }
-
+    // Use reporter count as a proxy for viewer consensus
+    // (without Supabase Presence, we use a fixed threshold of 3)
+    const threshold = 3;
     const reportCount = reporters.length;
     const consensusReached = reportCount >= threshold;
 
@@ -124,15 +108,6 @@ export async function POST(request: NextRequest) {
           offlineReporters: reporters,
         })
         .where(eq(broadcasts.id, broadcast_id));
-
-      await supabase.channel("broadcast-live").send({
-        type: "broadcast",
-        event: "stream_reconnecting",
-        payload: {
-          broadcast_id,
-          grace_period_expires_at: gracePeriodExpires.toISOString(),
-        },
-      });
 
       return NextResponse.json({
         success: true,
@@ -167,12 +142,6 @@ export async function POST(request: NextRequest) {
         recoveryCount: sql`${broadcasts.recoveryCount} + 1`,
       })
       .where(eq(broadcasts.id, broadcast_id));
-
-    await supabase.channel("broadcast-live").send({
-      type: "broadcast",
-      event: "stream_recovered",
-      payload: { broadcast_id },
-    });
 
     return NextResponse.json({
       success: true,

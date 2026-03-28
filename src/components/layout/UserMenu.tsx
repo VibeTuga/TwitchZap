@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { signIn, signOut } from "next-auth/react";
 import { useAuth } from "@/stores/authStore";
 
 export function UserMenu() {
@@ -11,7 +11,6 @@ export function UserMenu() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     if (!user) return;
@@ -38,9 +37,8 @@ export function UserMenu() {
   }, []);
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
     setOpen(false);
-    window.location.href = "/";
+    await signOut({ callbackUrl: "/" });
   }
 
   if (!user) {
@@ -48,12 +46,8 @@ export function UserMenu() {
       <>
         <button
           onClick={() =>
-            supabase.auth.signInWithOAuth({
-              provider: "twitch",
-              options: {
-                redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}`,
-                scopes: "user:read:email",
-              },
+            signIn("twitch", {
+              callbackUrl: window.location.pathname,
             })
           }
           className="hidden md:flex items-center gap-2 bg-[#9146FF]/20 hover:bg-[#9146FF]/40 px-4 py-2 rounded-full border border-[#9146FF]/40 backdrop-blur-md transition-all group shadow-[0_0_15px_rgba(145,70,255,0.3)] hover:shadow-[0_0_20px_rgba(145,70,255,0.5)]"
@@ -72,13 +66,8 @@ export function UserMenu() {
     );
   }
 
-  const avatarUrl =
-    user.user_metadata?.picture ||
-    user.user_metadata?.avatar_url;
-  const displayName =
-    user.user_metadata?.name ||
-    user.user_metadata?.preferred_username ||
-    "User";
+  const avatarUrl = user.avatar || user.image;
+  const displayName = user.twitchUsername || user.name || "User";
 
   return (
     <div className="flex items-center gap-3">

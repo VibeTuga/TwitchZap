@@ -1,18 +1,34 @@
 "use client";
 
+import { SessionProvider, useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, type AuthUser } from "@/stores/authStore";
 
 // Re-export useAuth so existing consumers don't break
 export { useAuth } from "@/stores/authStore";
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initialize = useAuthStore((s) => s.initialize);
+function AuthSync({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession();
+  const setUser = useAuthStore((s) => s.setUser);
 
   useEffect(() => {
-    const cleanup = initialize();
-    return cleanup;
-  }, [initialize]);
+    if (status === "loading") return;
+
+    if (status === "authenticated" && session?.user) {
+      const u = session.user as AuthUser;
+      setUser(u);
+    } else {
+      setUser(undefined);
+    }
+  }, [session, status, setUser]);
 
   return <>{children}</>;
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthSync>{children}</AuthSync>
+    </SessionProvider>
+  );
 }

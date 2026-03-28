@@ -26,17 +26,17 @@ npm run dev
 
 Create a `.env.local` file with the following:
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | Supabase PostgreSQL connection string (found in Supabase Dashboard → Settings → Database) |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (e.g. `https://xyz.supabase.co`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public API key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-side only, never expose to client) |
-| `TWITCH_CLIENT_ID` | Twitch application Client ID (from Twitch Developer Console) |
-| `TWITCH_CLIENT_SECRET` | Twitch application Client Secret |
-| `NEXT_PUBLIC_TWITCH_CLIENT_ID` | Same Twitch Client ID, exposed to client for embed |
-| `CRON_SECRET` | Secret token to authenticate cron job requests |
-| `NEXT_PUBLIC_APP_URL` | Public URL of the deployed app (e.g. `https://twitchzap.com`) |
+| Variable                        | Description                                                                               |
+| ------------------------------- | ----------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                  | Supabase PostgreSQL connection string (found in Supabase Dashboard → Settings → Database) |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL (e.g. `https://xyz.supabase.co`)                                     |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous/public API key                                                         |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service role key (server-side only, never expose to client)                      |
+| `TWITCH_CLIENT_ID`              | Twitch application Client ID (from Twitch Developer Console)                              |
+| `TWITCH_CLIENT_SECRET`          | Twitch application Client Secret                                                          |
+| `NEXT_PUBLIC_TWITCH_CLIENT_ID`  | Same Twitch Client ID, exposed to client for embed                                        |
+| `CRON_SECRET`                   | Secret token to authenticate cron job requests                                            |
+| `NEXT_PUBLIC_APP_URL`           | Public URL of the deployed app (e.g. `https://twitchzap.com`)                             |
 
 ## Supabase Twitch Auth Setup
 
@@ -52,8 +52,13 @@ TwitchZap uses Twitch as the sole authentication provider via Supabase Auth. **T
 6. Save
 
 Without this step, login attempts will fail with:
+
 ```json
-{"code": 400, "error_code": "validation_failed", "msg": "Unsupported provider: provider is not enabled"}
+{
+  "code": 400,
+  "error_code": "validation_failed",
+  "msg": "Unsupported provider: provider is not enabled"
+}
 ```
 
 ### 2. Configure Twitch OAuth Redirect URL
@@ -80,16 +85,19 @@ TwitchZap's core loop depends on the rotation endpoint being called **every 60 s
 1. Create a free account at [cron-job.org](https://cron-job.org)
 2. Create a new cron job with these settings:
 
-| Setting | Value |
-|---|---|
-| **URL** | `https://<your-domain>/api/cron/rotate` |
-| **Method** | GET |
-| **Schedule** | Every 1 minute (`*/1 * * * *`) |
+| Setting      | Value                                           |
+| ------------ | ----------------------------------------------- |
+| **URL**      | `https://<your-domain>/api/cron/rotate`         |
+| **Method**   | GET                                             |
+| **Schedule** | Every 1 minute (`*/1 * * * *`)                  |
+| **URL**      | `https://<your-domain>/api/cron/queue-guardian` |
+| **Method**   | GET                                             |
+| **Schedule** | Every 5 minutes (`*/5 * * * *`)                 |
 
 3. Under **Advanced → Headers**, add a custom header:
 
-| Header | Value |
-|---|---|
+| Header          | Value                             |
+| --------------- | --------------------------------- |
 | `Authorization` | `Bearer <your-CRON_SECRET-value>` |
 
 The `CRON_SECRET` value must match the one set in your environment variables. This header authenticates the request so the endpoint only responds to authorized callers.

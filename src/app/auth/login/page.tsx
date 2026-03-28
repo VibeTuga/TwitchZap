@@ -2,23 +2,16 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signIn } from "next-auth/react";
 
 function LoginContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
   const next = searchParams.get("next") || "/";
-  const supabase = createClient();
 
   async function handleLogin() {
-    await supabase.auth.signInWithOAuth({
-      provider: "twitch",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-        scopes: "user:read:email",
-      },
-    });
+    await signIn("twitch", { callbackUrl: next });
   }
 
   return (
